@@ -2,6 +2,16 @@ import { getAllTabs } from "./src/tabs.js";
 import { closeTabs } from "./src/actions.js";
 import { computeAutoCloseIds } from "./src/duplicates.js";
 import { openAsOwnTab, openPopupFromMenu } from "./src/contextMenu.js";
+import { createState, loadPrefs } from "./src/state.js";
+import { shouldMoveToNewWindow, computeBadgeText } from "./src/prefs.js";
+
+let prefs = createState();
+
+async function refreshPrefs() {
+  prefs = await loadPrefs(createState());
+  await chrome.action.setPopup({ popup: prefs.openInOwnTab ? "" : "popup.html" });
+  await updateBadge();
+}
 
 const MENU_OPEN_OWN_TAB = "open-own-tab";
 const MENU_OPEN_POPUP = "open-popup";
@@ -32,18 +42,33 @@ async function setupContextMenus() {
 
 async function updateBadge() {
   const tabs = await chrome.tabs.query({});
-  const count = tabs.length;
-  await chrome.action.setBadgeText({ text: String(count) });
+  await chrome.action.setBadgeText({ text: computeBadgeText(tabs.length, prefs.badge) });
 }
 
 chrome.action.setBadgeBackgroundColor({ color: "#2f6fed" });
 
-chrome.tabs.onCreated.addListener(updateBadge);
+chrome.tabs.onCreated.addListener(async (tab) => {
+  if (prefs.tabLimit) {
+    const windowTabs = await chrome.tabs.query({ windowId: tab.windowId });
+    const countBeforeThisTab = windowTabs.length - 1;
+    if (shouldMoveToNewWindow(countBeforeThisTab, prefs.tabLimit)) {
+      await chrome.windows.create({ tabId: tab.id });
+    }
+  }
+  await updateBadge();
+});
 chrome.tabs.onRemoved.addListener(updateBadge);
 chrome.tabs.onAttached.addListener(updateBadge);
 chrome.tabs.onDetached.addListener(updateBadge);
-chrome.runtime.onStartup.addListener(updateBadge);
-chrome.runtime.onInstalled.addListener(updateBadge);
+chrome.runtime.onStartup.addListener(refreshPrefs);
+chrome.runtime.onInstalled.addListener(refreshPrefs);
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes.tabManagerLitePrefs) refreshPrefs();
+});
+
+// Only fires when there's no default_popup set (i.e. "open in own tab" is on).
+chrome.action.onClicked.addListener(openAsOwnTab);
 
 chrome.commands.onCommand.addListener(async (command) => {
   if (command !== "close-duplicate-tabs") return;
@@ -51,5 +76,5 @@ chrome.commands.onCommand.addListener(async (command) => {
   await closeTabs(computeAutoCloseIds(tabs));
 });
 
-updateBadge();
+refreshPrefs();
 setupContextMenus();

@@ -24,6 +24,7 @@ const el = {
   settingsBar: document.getElementById("settingsBar"),
   viewModeBtns: document.querySelectorAll(".viewmode-btn"),
   themeBtns: document.querySelectorAll(".theme-btn"),
+  openOptionsBtn: document.getElementById("openOptionsBtn"),
   selectAll: document.getElementById("selectAll"),
   selectionSummary: document.getElementById("selectionSummary"),
   closeSelectedBtn: document.getElementById("closeSelectedBtn"),
@@ -148,6 +149,10 @@ for (const btn of el.themeBtns) {
     await savePrefs(state);
   });
 }
+
+el.openOptionsBtn.addEventListener("click", () => {
+  chrome.runtime.openOptionsPage();
+});
 
 el.list.addEventListener("click", async (ev) => {
   const restoreBtn = ev.target.closest(".restore-session-btn");

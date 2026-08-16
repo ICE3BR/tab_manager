@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Opções — Tab Manager Lite</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <header class="header">
+    <img src="icons/icon48.png" alt="" />
+    <h1>Tab Manager Lite — Opções</h1>
+  </header>
+
+  <main class="content">
+    <section class="card">
+      <h2>Abas por janela</h2>
+      <label class="field">
+        <span>Limitar abas por janela</span>
+        <input type="number" id="tabLimit" min="0" step="1" />
+      </label>
+      <p class="hint">
+        Ao atingir esse número de abas em uma janela, novas abas serão movidas automaticamente para uma janela nova.
+        <br /><i>Padrão: 0 (desativado). Sugestão: 15.</i>
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Interface</h2>
+      <label class="toggle-field">
+        <input type="checkbox" id="windowTitles" />
+        <span>Mostrar títulos de janela na lista</span>
+      </label>
+      <label class="toggle-field">
+        <input type="checkbox" id="badge" />
+        <span>Mostrar contador de abas no ícone da extensão</span>
+      </label>
+      <label class="toggle-field">
+        <input type="checkbox" id="openInOwnTab" />
+        <span>Abrir em aba própria por padrão (em vez do popup pequeno)</span>
+      </label>
+    </section>
+
+    <section class="card">
+      <h2>Sessões — backup</h2>
+      <div class="field-row">
+        <button id="exportBtn" type="button">Exportar sessões (.json)</button>
+        <label class="file-btn">
+          Importar sessões (.json)
+          <input type="file" id="importInput" accept="application/json" hidden />
+        </label>
+      </div>
+      <p class="hint" id="sessionsStatus"></p>
+    </section>
+
+    <section class="card">
+      <h2>Avançado</h2>
+      <button id="shortcutsBtn" type="button" class="link-btn">⌨️ Alterar atalhos de teclado</button>
+    </section>
+  </main>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>

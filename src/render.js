@@ -92,7 +92,9 @@ export function renderAllView(listEl, tabs, state) {
   let html = "";
   let windowIndex = 1;
   for (const [, windowTabs] of byWindow) {
-    html += `<div class="window-group-header">Janela ${windowIndex++} · ${windowTabs.length} aba(s)</div>`;
+    if (state.windowTitles !== false) {
+      html += `<div class="window-group-header">Janela ${windowIndex++} · ${windowTabs.length} aba(s)</div>`;
+    }
     for (const tab of windowTabs) {
       html += tabRowHtml(tab, state.selected.has(tab.id));
     }
