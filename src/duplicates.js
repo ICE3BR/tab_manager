@@ -50,3 +50,17 @@ export function groupByExactUrl(tabs) {
 export function findDuplicates(tabs, mode) {
   return mode === "url" ? groupByExactUrl(tabs) : groupBySite(tabs);
 }
+
+// Keeps the most recently opened tab (highest id) in a duplicate group and
+// returns the ids of the rest, to be closed.
+export function idsToCloseKeepingOne(group) {
+  if (group.tabs.length < 2) return [];
+  const survivor = group.tabs.reduce((a, b) => (b.id > a.id ? b : a));
+  return group.tabs.filter((t) => t.id !== survivor.id).map((t) => t.id);
+}
+
+// Used by the "close-duplicate-tabs" keyboard shortcut: auto-closes every
+// exact-URL duplicate across all open tabs, keeping one of each.
+export function computeAutoCloseIds(tabs) {
+  return groupByExactUrl(tabs).flatMap((group) => idsToCloseKeepingOne(group));
+}

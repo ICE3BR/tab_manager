@@ -11,6 +11,7 @@ export async function getAllTabs() {
       favIconUrl: t.favIconUrl || "",
       active: !!t.active,
       pinned: !!t.pinned,
+      muted: !!(t.mutedInfo && t.mutedInfo.muted),
       index: t.index,
     }))
     .sort((a, b) => a.windowId - b.windowId || a.index - b.index);

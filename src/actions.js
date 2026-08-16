@@ -14,3 +14,15 @@ export async function closeOthers(keepId, allTabs) {
   const ids = allTabs.filter((t) => t.id !== keepId && !t.pinned).map((t) => t.id);
   await closeTabs(ids);
 }
+
+export async function togglePinned(tab) {
+  await chrome.tabs.update(tab.id, { pinned: !tab.pinned });
+}
+
+export async function toggleMuted(tab) {
+  await chrome.tabs.update(tab.id, { muted: !tab.muted });
+}
+
+export async function discardTab(id) {
+  await chrome.tabs.discard(id);
+}
