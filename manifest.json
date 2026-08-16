@@ -28,6 +28,6 @@
       "description": "Fechar abas duplicadas (URL idêntica), mantendo a mais recente"
     }
   },
-  "permissions": ["tabs", "storage"],
+  "permissions": ["tabs", "storage", "contextMenus"],
   "minimum_chrome_version": "116"
 }

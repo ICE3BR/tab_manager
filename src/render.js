@@ -44,7 +44,7 @@ function tabRowHtml(tab, selected) {
   const discardedBadge = tab.discarded ? `<span class="discarded-badge">suspensa</span>` : "";
 
   return `
-    <div class="tab-row ${tab.discarded ? "is-discarded" : ""}" data-tab-id="${tab.id}">
+    <div class="tab-row ${tab.discarded ? "is-discarded" : ""} ${selected ? "is-selected" : ""}" data-tab-id="${tab.id}" title="${escapeHtml(tab.title)}\n${escapeHtml(tab.url)}">
       <input type="checkbox" class="row-checkbox" data-tab-id="${tab.id}" ${selected ? "checked" : ""} />
       ${icon}
       <div class="info">

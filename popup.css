@@ -53,7 +53,8 @@ html, body {
   font-size: 12px;
 }
 
-.toolbar #mergeWindowsBtn {
+.toolbar #mergeWindowsBtn,
+.toolbar #settingsBtn {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   color: var(--text-muted);
@@ -63,7 +64,8 @@ html, body {
   font-size: 14px;
 }
 
-.toolbar #mergeWindowsBtn:hover {
+.toolbar #mergeWindowsBtn:hover,
+.toolbar #settingsBtn:hover {
   color: var(--text);
 }
 
@@ -345,4 +347,78 @@ html, body {
 .action-buttons button.danger {
   border-color: var(--danger);
   color: var(--danger);
+}
+
+/* Light theme */
+html[data-theme="light"] {
+  --bg: #f5f6f8;
+  --bg-elevated: #ffffff;
+  --border: #d8dce3;
+  --text: #1b1f27;
+  --text-muted: #6b7383;
+  --accent: #2f6fed;
+  --accent-soft: #2f6fed22;
+  --danger: #c62828;
+  --danger-soft: #c6282822;
+}
+
+/* "Open in own tab" mode: relax the fixed popup dimensions into a full page */
+html.is-tab,
+html.is-tab body {
+  width: auto;
+  max-height: none;
+  height: 100vh;
+}
+
+html.is-tab body {
+  max-width: 900px;
+  margin: 0 auto;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+/* Selection feedback, visible in both list and grid view */
+.tab-row.is-selected {
+  background: var(--accent-soft);
+}
+
+/* Grid view: favicons only, title/url become the native tooltip */
+#list.view-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+  padding: 8px;
+}
+
+#list.view-grid .window-group-header {
+  flex-basis: 100%;
+}
+
+#list.view-grid .tab-row {
+  flex-direction: column;
+  width: 56px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  gap: 2px;
+}
+
+#list.view-grid .tab-row .row-checkbox,
+#list.view-grid .tab-row .info .url,
+#list.view-grid .tab-row .row-actions {
+  display: none;
+}
+
+#list.view-grid .tab-row .favicon {
+  width: 24px;
+  height: 24px;
+}
+
+#list.view-grid .tab-row .info {
+  width: 100%;
+}
+
+#list.view-grid .tab-row .title {
+  font-size: 10px;
+  text-align: center;
 }

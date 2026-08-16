@@ -14,6 +14,7 @@
       <option value="domain">Domínio</option>
     </select>
     <button id="mergeWindowsBtn" title="Mesclar todas as janelas nesta">⧉</button>
+    <button id="settingsBtn" title="Configurações de visualização">⚙</button>
   </header>
 
   <nav class="view-tabs" role="tablist">
@@ -26,6 +27,15 @@
     <span>Agrupar por:</span>
     <button class="mode-btn active" data-mode="site">Mesmo site</button>
     <button class="mode-btn" data-mode="url">URL idêntica</button>
+  </div>
+
+  <div id="settingsBar" class="duplicate-mode-bar" hidden>
+    <span>Visualização:</span>
+    <button class="viewmode-btn mode-btn active" data-viewmode="list">Lista</button>
+    <button class="viewmode-btn mode-btn" data-viewmode="grid">Grade</button>
+    <span>Tema:</span>
+    <button class="theme-btn mode-btn active" data-theme-option="dark">Escuro</button>
+    <button class="theme-btn mode-btn" data-theme-option="light">Claro</button>
   </div>
 
   <div id="sessionBar" class="duplicate-mode-bar" hidden>

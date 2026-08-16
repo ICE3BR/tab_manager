@@ -1,6 +1,6 @@
 import { getAllTabs } from "./src/tabs.js";
 import { closeTabs, closeOthers, focusTab, togglePinned, toggleMuted, discardTab } from "./src/actions.js";
-import { createState, loadPrefs, savePrefs } from "./src/state.js";
+import { createState, loadPrefs, savePrefs, idsInRange } from "./src/state.js";
 import { render, renderFooter, renderSessionsView, visibleTabIdsFor } from "./src/render.js";
 import { saveSession, listSessions, deleteSession, restoreSession } from "./src/sessions.js";
 import { mergeAllWindowsInto } from "./src/windows.js";
@@ -16,16 +16,30 @@ const el = {
   list: document.getElementById("list"),
   viewTabs: document.querySelectorAll(".view-tab"),
   duplicateModeBar: document.getElementById("duplicateModeBar"),
-  modeBtns: document.querySelectorAll(".mode-btn"),
+  modeBtns: document.querySelectorAll("#duplicateModeBar .mode-btn"),
   sessionBar: document.getElementById("sessionBar"),
   sessionName: document.getElementById("sessionName"),
   saveSessionBtn: document.getElementById("saveSessionBtn"),
+  settingsBtn: document.getElementById("settingsBtn"),
+  settingsBar: document.getElementById("settingsBar"),
+  viewModeBtns: document.querySelectorAll(".viewmode-btn"),
+  themeBtns: document.querySelectorAll(".theme-btn"),
   selectAll: document.getElementById("selectAll"),
   selectionSummary: document.getElementById("selectionSummary"),
   closeSelectedBtn: document.getElementById("closeSelectedBtn"),
   closeOthersBtn: document.getElementById("closeOthersBtn"),
   statusMsg: document.getElementById("statusMsg"),
 };
+
+function applyViewMode() {
+  el.list.classList.toggle("view-grid", state.viewMode === "grid");
+  for (const b of el.viewModeBtns) b.classList.toggle("active", b.dataset.viewmode === state.viewMode);
+}
+
+function applyTheme() {
+  document.documentElement.dataset.theme = state.theme;
+  for (const b of el.themeBtns) b.classList.toggle("active", b.dataset.themeOption === state.theme);
+}
 
 let statusTimer;
 function showStatus(text) {
@@ -115,6 +129,26 @@ for (const btn of el.modeBtns) {
   });
 }
 
+el.settingsBtn.addEventListener("click", () => {
+  el.settingsBar.hidden = !el.settingsBar.hidden;
+});
+
+for (const btn of el.viewModeBtns) {
+  btn.addEventListener("click", async () => {
+    state.viewMode = btn.dataset.viewmode;
+    applyViewMode();
+    await savePrefs(state);
+  });
+}
+
+for (const btn of el.themeBtns) {
+  btn.addEventListener("click", async () => {
+    state.theme = btn.dataset.themeOption;
+    applyTheme();
+    await savePrefs(state);
+  });
+}
+
 el.list.addEventListener("click", async (ev) => {
   const restoreBtn = ev.target.closest(".restore-session-btn");
   if (restoreBtn) {
@@ -178,6 +212,7 @@ el.list.addEventListener("click", async (ev) => {
     const id = Number(checkbox.dataset.tabId);
     if (checkbox.checked) state.selected.add(id);
     else state.selected.delete(id);
+    state.lastSelectedId = id;
     refreshUI();
     return;
   }
@@ -188,6 +223,27 @@ el.list.addEventListener("click", async (ev) => {
     const tab = allTabs.find((t) => t.id === id);
     if (tab) await focusTab(tab);
   }
+});
+
+el.list.addEventListener("contextmenu", (ev) => {
+  const row = ev.target.closest(".tab-row");
+  if (!row) return;
+  ev.preventDefault();
+
+  const id = Number(row.dataset.tabId);
+  const visibleIds = visibleTabIdsFor(allTabs, state);
+
+  if (ev.shiftKey) {
+    for (const rangeId of idsInRange(visibleIds, state.lastSelectedId, id)) {
+      state.selected.add(rangeId);
+    }
+  } else if (state.selected.has(id)) {
+    state.selected.delete(id);
+  } else {
+    state.selected.add(id);
+  }
+  state.lastSelectedId = id;
+  refreshUI();
 });
 
 el.selectAll.addEventListener("change", () => {
@@ -216,9 +272,15 @@ chrome.tabs.onRemoved.addListener(reloadTabs);
 chrome.tabs.onCreated.addListener(reloadTabs);
 chrome.tabs.onUpdated.addListener(reloadTabs);
 
+if (new URLSearchParams(location.search).get("tab") === "true") {
+  document.documentElement.classList.add("is-tab");
+}
+
 (async () => {
   await loadPrefs(state);
   el.sortBy.value = state.sortBy;
   for (const b of el.modeBtns) b.classList.toggle("active", b.dataset.mode === state.duplicateMode);
+  applyViewMode();
+  applyTheme();
   await reloadTabs();
 })();
