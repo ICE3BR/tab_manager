@@ -1,8 +1,19 @@
 // Minimal in-memory stand-in for the chrome.* extension APIs used by src/*,
 // so unit/integration tests can run under plain Node without a browser.
 
-export function installChromeMock({ tabs = [], windows = [] } = {}) {
-  const calls = { tabsUpdate: [], tabsMove: [], tabsDiscard: [], tabsRemove: [], windowsRemove: [], windowsCreate: [] };
+export function installChromeMock({ tabs = [], windows = [], extensionId = "test-ext-id" } = {}) {
+  const calls = {
+    tabsUpdate: [],
+    tabsMove: [],
+    tabsDiscard: [],
+    tabsRemove: [],
+    tabsCreate: [],
+    tabsHighlight: [],
+    windowsRemove: [],
+    windowsCreate: [],
+    windowsUpdate: [],
+    actionOpenPopup: 0,
+  };
   let storageLocal = {};
 
   const chrome = {
@@ -36,7 +47,13 @@ export function installChromeMock({ tabs = [], windows = [] } = {}) {
         const list = Array.isArray(ids) ? ids : [ids];
         calls.tabsRemove.push(list);
       },
-      async create() {},
+      async create(props) {
+        calls.tabsCreate.push(props);
+        return { id: 9998 };
+      },
+      async highlight(props) {
+        calls.tabsHighlight.push(props);
+      },
     },
     windows: {
       async getAll() {
@@ -49,7 +66,9 @@ export function installChromeMock({ tabs = [], windows = [] } = {}) {
         calls.windowsCreate.push(props);
         return { id: 9999 };
       },
-      async update() {},
+      async update(windowId, props) {
+        calls.windowsUpdate.push({ windowId, props });
+      },
     },
     storage: {
       local: {
@@ -65,13 +84,24 @@ export function installChromeMock({ tabs = [], windows = [] } = {}) {
     action: {
       async setBadgeText() {},
       async setBadgeBackgroundColor() {},
+      async openPopup() {
+        calls.actionOpenPopup += 1;
+      },
     },
     runtime: {
       onStartup: { addListener() {} },
       onInstalled: { addListener() {} },
+      getURL(path) {
+        return `chrome-extension://${extensionId}/${path}`;
+      },
     },
     commands: {
       onCommand: { addListener() {} },
+    },
+    contextMenus: {
+      async removeAll() {},
+      create() {},
+      onClicked: { addListener() {} },
     },
   };
 
