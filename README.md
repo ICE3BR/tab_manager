@@ -28,6 +28,16 @@ Extensão leve para Chrome/Chromium (Manifest V3) para gerenciar abas: buscar, o
 - Menu de contexto ao clicar direito no ícone da extensão: "Abrir em aba própria" (reabre a mesma aba se já estiver aberta, em vez de duplicar), "Abrir popup", e atalho direto para `chrome://extensions/shortcuts`.
 - Painel de configurações (⚙): visualização em **Lista** ou **Grade** (grade de favicons), e tema **Escuro**/**Claro** — preferências persistidas.
 
+### Fase 4 — Página de Opções
+
+Acessível em `chrome://extensions` → Detalhes → "Opções da extensão", ou pelo botão "Mais opções…" no painel ⚙ do popup.
+
+- Limitar abas por janela: ao atingir o número configurado, novas abas abrem automaticamente numa janela nova.
+- Alternar exibição dos títulos de janela e do contador de abas no ícone.
+- Abrir em aba própria por padrão (o clique no ícone abre o dashboard completo em vez do popup pequeno).
+- Backup de sessões: exportar para `.json` e importar de volta (mescla com as sessões existentes, sem sobrescrever).
+- Atalho para `chrome://extensions/shortcuts`.
+
 ## Instalação (modo desenvolvedor)
 
 1. Abra `chrome://extensions`.
@@ -46,8 +56,10 @@ Extensão leve para Chrome/Chromium (Manifest V3) para gerenciar abas: buscar, o
 - `src/windows.js` — mesclar janelas e mover abas entre janelas.
 - `src/sessions.js` — salvar/listar/excluir/restaurar sessões (`chrome.storage.local`).
 - `src/contextMenu.js` — lógica de "abrir em aba própria" (reaproveita `popup.html`) e "abrir popup" para o menu de contexto do ícone.
+- `src/prefs.js` — lógica pura do limite de abas por janela e da visibilidade do badge.
 - `src/render.js` — renderização da lista e das sessões.
-- `src/state.js` — estado da UI, preferências persistidas (ordenação, modo de duplicata, visualização, tema) e seleção por intervalo.
+- `src/state.js` — estado da UI e todas as preferências persistidas (ordenação, duplicata, visualização, tema, limite de abas, títulos, badge, aba própria).
+- `options.html` / `options.css` / `options.js` — página de Opções completa (registrada via `options_ui` no manifest).
 
 Sem build step: é JavaScript puro com módulos ES, carregado diretamente pelo navegador.
 
