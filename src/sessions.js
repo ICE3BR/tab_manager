@@ -35,3 +35,38 @@ export async function restoreSession(session) {
   if (!session.tabs.length) return;
   await chrome.windows.create({ url: session.tabs.map((t) => t.url) });
 }
+
+export function exportSessionsJson(sessions) {
+  return JSON.stringify(sessions, null, 2);
+}
+
+function isSessionShaped(value) {
+  return !!value && typeof value === "object" && Array.isArray(value.tabs);
+}
+
+// Parses a backup file's contents into valid sessions, discarding anything
+// malformed and assigning fresh ids so imports never collide with existing
+// sessions (or each other).
+export function parseImportedSessions(jsonText, { makeId = () => crypto.randomUUID() } = {}) {
+  let data;
+  try {
+    data = JSON.parse(jsonText);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(data)) return [];
+
+  return data
+    .filter(isSessionShaped)
+    .map((s) => createSession(s.name || "", s.tabs, { id: makeId(), createdAt: s.createdAt }));
+}
+
+export async function importSessions(jsonText, opts) {
+  const imported = parseImportedSessions(jsonText, opts);
+  const existing = await listSessions();
+  if (imported.length === 0) return existing;
+
+  const merged = [...imported, ...existing];
+  await chrome.storage.local.set({ [STORAGE_KEY]: merged });
+  return merged;
+}

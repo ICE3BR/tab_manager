@@ -9,6 +9,10 @@ const defaultState = {
   duplicateMode: "site", // "site" | "url"
   viewMode: "list", // "list" | "grid"
   theme: "dark", // "dark" | "light"
+  tabLimit: 0, // 0 = disabled; otherwise move new tabs to a new window past this count
+  windowTitles: true,
+  badge: true,
+  openInOwnTab: false,
   selected: new Set(),
   lastSelectedId: null,
 };
@@ -25,6 +29,10 @@ export async function loadPrefs(state) {
     if (prefs.duplicateMode) state.duplicateMode = prefs.duplicateMode;
     if (prefs.viewMode) state.viewMode = prefs.viewMode;
     if (prefs.theme) state.theme = prefs.theme;
+    if (typeof prefs.tabLimit === "number") state.tabLimit = prefs.tabLimit;
+    if (typeof prefs.windowTitles === "boolean") state.windowTitles = prefs.windowTitles;
+    if (typeof prefs.badge === "boolean") state.badge = prefs.badge;
+    if (typeof prefs.openInOwnTab === "boolean") state.openInOwnTab = prefs.openInOwnTab;
   }
   return state;
 }
@@ -36,6 +44,10 @@ export async function savePrefs(state) {
       duplicateMode: state.duplicateMode,
       viewMode: state.viewMode,
       theme: state.theme,
+      tabLimit: state.tabLimit,
+      windowTitles: state.windowTitles,
+      badge: state.badge,
+      openInOwnTab: state.openInOwnTab,
     },
   });
 }
