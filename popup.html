@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Tab Manager Lite</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header class="toolbar">
+    <input id="search" type="search" placeholder="Buscar por título ou URL..." autocomplete="off" />
+    <select id="sortBy" title="Ordenar por">
+      <option value="opened">Ordem de abertura</option>
+      <option value="title">Título</option>
+      <option value="domain">Domínio</option>
+    </select>
+  </header>
+
+  <nav class="view-tabs" role="tablist">
+    <button class="view-tab active" data-view="all" role="tab" aria-selected="true">Todas as abas</button>
+    <button class="view-tab" data-view="duplicates" role="tab" aria-selected="false">Duplicatas</button>
+  </nav>
+
+  <div id="duplicateModeBar" class="duplicate-mode-bar" hidden>
+    <span>Agrupar por:</span>
+    <button class="mode-btn active" data-mode="site">Mesmo site</button>
+    <button class="mode-btn" data-mode="url">URL idêntica</button>
+  </div>
+
+  <main id="list" class="tab-list" aria-live="polite"></main>
+
+  <footer class="action-bar">
+    <label class="select-all">
+      <input type="checkbox" id="selectAll" />
+      <span id="selectionSummary">0 selecionadas</span>
+    </label>
+    <div class="action-buttons">
+      <button id="closeOthersBtn" disabled title="Fechar todas as abas exceto a selecionada">Fechar outras</button>
+      <button id="closeSelectedBtn" disabled class="danger">Fechar selecionadas</button>
+    </div>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
