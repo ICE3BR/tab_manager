@@ -15,3 +15,21 @@ export function countTabsExcluding(windowTabs, excludeTabId) {
 export function computeBadgeText(tabCount, badgeEnabled) {
   return badgeEnabled ? String(tabCount) : "";
 }
+
+// Orchestrates the tab-limit check for a single newly created tab: queries
+// its window, decides via shouldMoveToNewWindow/countTabsExcluding, and
+// moves it out to a new window if needed. Takes `tabLimit` as an explicit
+// argument (never reads cached/shared state) so the caller is always in
+// control of freshness — this is what background.js's tabs.onCreated
+// listener calls with a just-loaded pref, avoiding the MV3 service-worker
+// cold-start race where a stale cached value would silently skip the check.
+export async function applyTabLimit(tab, tabLimit) {
+  if (!tabLimit) return false;
+
+  const windowTabs = await chrome.tabs.query({ windowId: tab.windowId });
+  const countBeforeThisTab = countTabsExcluding(windowTabs, tab.id);
+  if (!shouldMoveToNewWindow(countBeforeThisTab, tabLimit)) return false;
+
+  await chrome.windows.create({ tabId: tab.id });
+  return true;
+}
