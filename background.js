@@ -3,7 +3,7 @@ import { closeTabs } from "./src/actions.js";
 import { computeAutoCloseIds } from "./src/duplicates.js";
 import { openAsOwnTab, openPopupFromMenu } from "./src/contextMenu.js";
 import { createState, loadPrefs } from "./src/state.js";
-import { shouldMoveToNewWindow, computeBadgeText, countTabsExcluding } from "./src/prefs.js";
+import { computeBadgeText, applyTabLimit } from "./src/prefs.js";
 
 let prefs = createState();
 
@@ -48,13 +48,12 @@ async function updateBadge() {
 chrome.action.setBadgeBackgroundColor({ color: "#2f6fed" });
 
 chrome.tabs.onCreated.addListener(async (tab) => {
-  if (prefs.tabLimit) {
-    const windowTabs = await chrome.tabs.query({ windowId: tab.windowId });
-    const countBeforeThisTab = countTabsExcluding(windowTabs, tab.id);
-    if (shouldMoveToNewWindow(countBeforeThisTab, prefs.tabLimit)) {
-      await chrome.windows.create({ tabId: tab.id });
-    }
-  }
+  // Always load prefs fresh here instead of trusting the module-level
+  // `prefs` cache: MV3 service workers restart on idle, and the tab that
+  // wakes this worker back up can otherwise run before refreshPrefs()'s
+  // async load resolves, silently skipping the limit for one tab.
+  const { tabLimit } = await loadPrefs(createState());
+  await applyTabLimit(tab, tabLimit);
   await updateBadge();
 });
 chrome.tabs.onRemoved.addListener(updateBadge);
