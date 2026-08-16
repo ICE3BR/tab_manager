@@ -94,16 +94,6 @@ node --test
 ℹ tests 52, pass 52, fail 0
 ```
 
-**This did not fix the reported symptom** — the user retested and still saw the move happen at the 158th tab, not the 157th, with no change in behavior. That ruled out the counting formula (which was mathematically equivalent before and after in the common case) and pointed at something else entirely.
-
-### Follow-up: the real root cause was an MV3 service-worker cold-start race
-
-`background.js` cached prefs in a module-level `let prefs = createState()`, refreshed asynchronously by `refreshPrefs()` (`chrome.storage.local.get` under the hood) and never awaited at top level. MV3 service workers are killed after ~30s idle and restarted on the next event. Whichever tab-creation event wakes the worker back up can run its listener **before** that async `refreshPrefs()` load resolves — so that one tab sees `prefs.tabLimit` still at its default (`0`, disabled) and skips the check entirely. Only the *next* tab creation, by which point prefs has loaded, correctly sees `tabLimit: 156` — a consistent one-tab-late symptom that exactly matches what was reported, and explains why the earlier counting fix had zero observable effect (it fixed a real but not-yet-manifesting edge case, not this one).
-
-**Fix**: the `tabs.onCreated` handler now calls `await loadPrefs(createState())` itself for every single tab creation, instead of trusting the module-level cache, so the tab-limit decision is never stale regardless of service-worker wake timing. The top-level `refreshPrefs()` call is also now `await`ed (top-level await, valid in this ES module) to shrink the staleness window for the badge/popup-mode behaviors too.
-
-This fix lives entirely in `background.js` (the untested orchestration layer — see the documented gap above); the underlying pieces it composes (`loadPrefs`, `countTabsExcluding`, `shouldMoveToNewWindow`) are already covered by the existing unit tests. Verified with `node --test` (52/52 still passing) plus manual retest in the browser.
-
 ## Merge Evidence
 
 Checkpoint commits kept as-is (not squashed):
