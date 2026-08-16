@@ -79,6 +79,21 @@ Same documented gap as Fases 2–3: `options.html`/`options.js`, `render.js`, `p
 - [ ] Exportar sessões → baixa um `.json`; importar esse mesmo arquivo → sessões aparecem duplicadas com ids novos, sem perder as existentes.
 - [ ] Botão "Mais opções…" no popup abre a página de Opções.
 
+## Bug Fix: tab limit triggered one tab late (off-by-one)
+
+**Reported**: with the limit set to 156, the move only happened when opening the 158th tab, not the 157th.
+
+**Root cause**: `background.js` computed `countBeforeThisTab` as `windowTabs.length - 1`, assuming `chrome.tabs.query` always already includes the just-created tab at the moment `tabs.onCreated` fires. When Chrome runs the query before the new tab is attached to the window's tab list, that subtraction removes a tab that was never counted in the first place, undercounting by one and delaying the move by one extra tab.
+
+- RED commit `0147987`: added `countTabsExcluding(windowTabs, excludeTabId)` tests — filtering by id instead of assuming presence, covering both cases (tab present in the query result, and not).
+- GREEN commit `79f1d73`: implemented `countTabsExcluding` in `prefs.js`.
+- Follow-up commit: `background.js`'s `tabs.onCreated` handler now calls `countTabsExcluding(windowTabs, tab.id)` instead of `windowTabs.length - 1`.
+
+```
+node --test
+ℹ tests 52, pass 52, fail 0
+```
+
 ## Merge Evidence
 
 Checkpoint commits kept as-is (not squashed):

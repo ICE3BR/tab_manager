@@ -3,7 +3,7 @@ import { closeTabs } from "./src/actions.js";
 import { computeAutoCloseIds } from "./src/duplicates.js";
 import { openAsOwnTab, openPopupFromMenu } from "./src/contextMenu.js";
 import { createState, loadPrefs } from "./src/state.js";
-import { shouldMoveToNewWindow, computeBadgeText } from "./src/prefs.js";
+import { shouldMoveToNewWindow, computeBadgeText, countTabsExcluding } from "./src/prefs.js";
 
 let prefs = createState();
 
@@ -50,7 +50,7 @@ chrome.action.setBadgeBackgroundColor({ color: "#2f6fed" });
 chrome.tabs.onCreated.addListener(async (tab) => {
   if (prefs.tabLimit) {
     const windowTabs = await chrome.tabs.query({ windowId: tab.windowId });
-    const countBeforeThisTab = windowTabs.length - 1;
+    const countBeforeThisTab = countTabsExcluding(windowTabs, tab.id);
     if (shouldMoveToNewWindow(countBeforeThisTab, prefs.tabLimit)) {
       await chrome.windows.create({ tabId: tab.id });
     }
