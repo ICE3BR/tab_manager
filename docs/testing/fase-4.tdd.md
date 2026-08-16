@@ -94,9 +94,36 @@ node --test
 ℹ tests 52, pass 52, fail 0
 ```
 
+**This did not fix the reported symptom.** The user retested and still saw the move happen at the 158th tab, not the 157th — no change from before. That ruled out the counting formula (mathematically equivalent before/after in the common case) as the actual cause.
+
+### Follow-up #1 (reverted by the user): MV3 service-worker cold-start race
+
+Root cause found: `background.js` cached prefs in a module-level `let prefs`, refreshed asynchronously and never awaited at startup. MV3 service workers restart on idle; whichever tab-creation event wakes the worker back up can run before that async load resolves, seeing `tabLimit: 0` and skipping the check — a consistent one-tab-late symptom matching the report.
+
+The fix applied at the time (commit `1794da6`) added a top-level `await refreshPrefs()` and reassigned the module-level `prefs` variable from inside the `tabs.onCreated` listener. **This broke the extension** — the user had to roll the files back (`git status` showed `background.js` and this doc reverted to the `c1581b5` state) and asked for the fix to be redone through `/ecc:tdd-workflow` instead of a direct, untested edit to the orchestration layer.
+
+### Follow-up #2: `applyTabLimit`, done via TDD (this cycle)
+
+Same root cause as above, fixed differently: rather than editing `background.js`'s untested listener directly again, the query→decide→move orchestration was extracted into a testable async function, `applyTabLimit(tab, tabLimit)` in `prefs.js`, that takes `tabLimit` as an explicit argument and never reads shared/cached state.
+
+- RED commit `7dbf455`: `applyTabLimit` didn't exist; added 4 tests via `chromeMock` (limit disabled, moves at the threshold, stays under the threshold, and — mirroring the original race — stays correct even when the query result doesn't yet include the new tab).
+- GREEN commit `e46f2e6`: implemented `applyTabLimit`.
+- Wiring commit `3963082`: `background.js`'s `tabs.onCreated` now does `const { tabLimit } = await loadPrefs(createState()); await applyTabLimit(tab, tabLimit);` — fresh prefs every time, **no top-level `await`, no reassigning the shared `prefs` variable from inside the listener** (the two changes suspected of having destabilized the service worker last time).
+
+```
+node --test
+ℹ tests 56, pass 56, fail 0
+node --test --experimental-test-coverage
+prefs.js: 100% lines | 100% branch | 100% funcs
+all files: 97.00% lines | 87.50% branch | 82.56% funcs
+```
+
 ## Merge Evidence
 
 Checkpoint commits kept as-is (not squashed):
 - `16c8473` — RED: Fase 4 tests added, failing for the intended reasons.
 - `5db1a88` — GREEN: minimal implementation, 50/50 tests passing.
 - `b5a92b7` — Options page + UI wiring (untested DOM/orchestration layer, same documented gap).
+- `7dbf455` — RED: reproducer for the tab-limit race, via the extracted `applyTabLimit`.
+- `e46f2e6` — GREEN: `applyTabLimit` implemented, 56/56 passing.
+- `3963082` — minimal `background.js` wiring, avoiding the changes that broke the extension last time.
