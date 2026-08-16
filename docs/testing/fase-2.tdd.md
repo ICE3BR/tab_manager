@@ -92,3 +92,26 @@ Checkpoint commits are kept as-is (not squashed):
 - `8533c21` — RED: Fase 2 tests added, failing for the intended reasons.
 - `4df5995` — GREEN: minimal implementation, all 24 tests passing.
 - (this report + UI wiring) — feat commit finishing the popup/background integration, no logic changes to the tested modules.
+
+## Bug Fix: "Suspender" (discard) reported as doing nothing
+
+**Root cause**: `chrome.tabs.discard()` silently refuses to discard the *active* tab (returns the tab unchanged instead of throwing), and the popup UI had zero visual indication of a discarded tab — so even a successful discard on a background tab looked like nothing happened.
+
+- RED commit `9d44bd3`: updated `chromeMock.js` to model the active-tab refusal; added failing tests asserting `discardTab()` returns `true`/`false`, and that `getAllTabs()` normalizes `tab.discarded`.
+
+  ```
+  node --test
+  ✖ src\actions.test.js > reports failure when the tab cannot be discarded (actual: undefined, expected: false)
+  ✖ src\tabs.test.js > normalizes discarded state (actual: undefined, expected: true)
+  ```
+
+- GREEN commit `a816f2d`: `discardTab()` now returns whether `chrome.tabs.discard` actually set `discarded: true`; `tabs.js` normalizes `discarded`.
+
+  ```
+  node --test
+  ℹ tests 26, pass 26, fail 0
+  ```
+
+- Follow-up UI commit (untested DOM layer, same gap documented above): discard button is now `disabled` with an explanatory tooltip when the tab is active or already discarded, rows show a "suspensa" badge and dim, and the popup shows a transient status message ("Aba suspensa." / "Não foi possível suspender...") so the result is always visible.
+
+**Known limitation kept as-is per user decision**: the `Ctrl+Shift+D` shortcut collides with Brave/Chrome's native "bookmark all tabs" binding. The user asked to leave it unchanged for now rather than rebind it.

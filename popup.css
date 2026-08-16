@@ -101,6 +101,36 @@ html, body {
   color: var(--accent);
 }
 
+.tab-row .row-actions button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.tab-row.is-discarded {
+  opacity: 0.6;
+}
+
+.discarded-badge {
+  display: inline-block;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 4px;
+  font-size: 10px;
+  padding: 0 4px;
+  margin-right: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.status-msg {
+  padding: 6px 10px;
+  font-size: 12px;
+  text-align: center;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+
 #sessionBar input {
   flex: 1;
   background: var(--bg-elevated);

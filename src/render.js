@@ -34,18 +34,27 @@ function tabRowHtml(tab, selected) {
   const icon = tab.favIconUrl
     ? `<img class="favicon" src="${escapeHtml(tab.favIconUrl)}" alt="" />`
     : `<span class="favicon"></span>`;
+
+  const discardDisabled = tab.active || tab.discarded;
+  const discardTitle = tab.active
+    ? "Não é possível suspender a aba ativa"
+    : tab.discarded
+    ? "Aba já suspensa"
+    : "Suspender (liberar memória)";
+  const discardedBadge = tab.discarded ? `<span class="discarded-badge">suspensa</span>` : "";
+
   return `
-    <div class="tab-row" data-tab-id="${tab.id}">
+    <div class="tab-row ${tab.discarded ? "is-discarded" : ""}" data-tab-id="${tab.id}">
       <input type="checkbox" class="row-checkbox" data-tab-id="${tab.id}" ${selected ? "checked" : ""} />
       ${icon}
       <div class="info">
-        <div class="title">${escapeHtml(tab.title)}</div>
+        <div class="title">${discardedBadge}${escapeHtml(tab.title)}</div>
         <div class="url">${escapeHtml(tab.url)}</div>
       </div>
       <div class="row-actions">
         <button class="pin-tab-btn ${tab.pinned ? "active" : ""}" data-tab-id="${tab.id}" title="${tab.pinned ? "Desafixar" : "Fixar"}">${tab.pinned ? "📌" : "📍"}</button>
         <button class="mute-tab-btn ${tab.muted ? "active" : ""}" data-tab-id="${tab.id}" title="${tab.muted ? "Reativar som" : "Silenciar"}">${tab.muted ? "🔇" : "🔈"}</button>
-        <button class="discard-tab-btn" data-tab-id="${tab.id}" title="Suspender (liberar memória)">💤</button>
+        <button class="discard-tab-btn" data-tab-id="${tab.id}" title="${discardTitle}" ${discardDisabled ? "disabled" : ""}>💤</button>
         <button class="close-tab-btn" data-tab-id="${tab.id}" title="Fechar aba">✕</button>
       </div>
     </div>`;

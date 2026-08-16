@@ -24,7 +24,18 @@ const el = {
   selectionSummary: document.getElementById("selectionSummary"),
   closeSelectedBtn: document.getElementById("closeSelectedBtn"),
   closeOthersBtn: document.getElementById("closeOthersBtn"),
+  statusMsg: document.getElementById("statusMsg"),
 };
+
+let statusTimer;
+function showStatus(text) {
+  el.statusMsg.textContent = text;
+  el.statusMsg.hidden = false;
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => {
+    el.statusMsg.hidden = true;
+  }, 2500);
+}
 
 function refreshUI() {
   if (state.view === "sessions") {
@@ -146,7 +157,9 @@ el.list.addEventListener("click", async (ev) => {
   const discardBtn = ev.target.closest(".discard-tab-btn");
   if (discardBtn) {
     ev.stopPropagation();
-    await discardTab(Number(discardBtn.dataset.tabId));
+    const ok = await discardTab(Number(discardBtn.dataset.tabId));
+    showStatus(ok ? "Aba suspensa." : "Não foi possível suspender: a aba está ativa ou já suspensa.");
+    await reloadTabs();
     return;
   }
 
