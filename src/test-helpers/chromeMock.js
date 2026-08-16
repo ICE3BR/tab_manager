@@ -24,7 +24,13 @@ export function installChromeMock({ tabs = [], windows = [] } = {}) {
       },
       async discard(tabId) {
         calls.tabsDiscard.push(tabId);
-        return tabs.find((t) => t.id === tabId);
+        const tab = tabs.find((t) => t.id === tabId);
+        if (!tab) return undefined;
+        // Chrome silently refuses to discard the active tab: it returns the
+        // tab unchanged instead of throwing.
+        if (tab.active) return tab;
+        tab.discarded = true;
+        return tab;
       },
       async remove(ids) {
         const list = Array.isArray(ids) ? ids : [ids];

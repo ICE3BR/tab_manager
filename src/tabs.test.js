@@ -16,6 +16,18 @@ describe("getAllTabs", () => {
     assert.equal(tabs[1].muted, false);
   });
 
+  test("normalizes discarded state", async () => {
+    installChromeMock({
+      tabs: [
+        { id: 1, windowId: 1, index: 0, title: "A", url: "https://a.com", discarded: true },
+        { id: 2, windowId: 1, index: 1, title: "B", url: "https://b.com" },
+      ],
+    });
+    const tabs = await getAllTabs();
+    assert.equal(tabs[0].discarded, true);
+    assert.equal(tabs[1].discarded, false);
+  });
+
   test("sorts by windowId then index", async () => {
     installChromeMock({
       tabs: [

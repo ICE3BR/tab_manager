@@ -47,9 +47,16 @@ describe("toggleMuted", () => {
 });
 
 describe("discardTab", () => {
-  test("calls chrome.tabs.discard with the tab id", async () => {
-    const { calls } = installChromeMock();
-    await discardTab(9);
+  test("discards a background tab and reports success", async () => {
+    const { calls } = installChromeMock({ tabs: [{ id: 9, active: false }] });
+    const result = await discardTab(9);
     assert.deepEqual(calls.tabsDiscard, [9]);
+    assert.equal(result, true);
+  });
+
+  test("reports failure when the tab cannot be discarded (e.g. it's active)", async () => {
+    installChromeMock({ tabs: [{ id: 9, active: true }] });
+    const result = await discardTab(9);
+    assert.equal(result, false);
   });
 });
