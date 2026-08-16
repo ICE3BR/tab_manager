@@ -1,0 +1,11 @@
+{
+  "name": "tab-manager-lite",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Extensão leve de gerenciamento de abas para Chrome/Chromium (MV3).",
+  "scripts": {
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage"
+  }
+}
