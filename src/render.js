@@ -43,9 +43,35 @@ function tabRowHtml(tab, selected) {
         <div class="url">${escapeHtml(tab.url)}</div>
       </div>
       <div class="row-actions">
+        <button class="pin-tab-btn ${tab.pinned ? "active" : ""}" data-tab-id="${tab.id}" title="${tab.pinned ? "Desafixar" : "Fixar"}">${tab.pinned ? "📌" : "📍"}</button>
+        <button class="mute-tab-btn ${tab.muted ? "active" : ""}" data-tab-id="${tab.id}" title="${tab.muted ? "Reativar som" : "Silenciar"}">${tab.muted ? "🔇" : "🔈"}</button>
+        <button class="discard-tab-btn" data-tab-id="${tab.id}" title="Suspender (liberar memória)">💤</button>
         <button class="close-tab-btn" data-tab-id="${tab.id}" title="Fechar aba">✕</button>
       </div>
     </div>`;
+}
+
+function sessionRowHtml(session) {
+  const date = new Date(session.createdAt).toLocaleString("pt-BR");
+  return `
+    <div class="session-row" data-session-id="${escapeHtml(session.id)}">
+      <div class="info">
+        <div class="title">${escapeHtml(session.name)}</div>
+        <div class="url">${session.tabs.length} aba(s) · ${escapeHtml(date)}</div>
+      </div>
+      <div class="row-actions">
+        <button class="restore-session-btn" data-session-id="${escapeHtml(session.id)}" title="Restaurar sessão">↺</button>
+        <button class="delete-session-btn" data-session-id="${escapeHtml(session.id)}" title="Excluir sessão">✕</button>
+      </div>
+    </div>`;
+}
+
+export function renderSessionsView(listEl, sessions) {
+  if (sessions.length === 0) {
+    listEl.innerHTML = `<div class="empty-state">Nenhuma sessão salva ainda.</div>`;
+    return;
+  }
+  listEl.innerHTML = sessions.map(sessionRowHtml).join("");
 }
 
 export function renderAllView(listEl, tabs, state) {

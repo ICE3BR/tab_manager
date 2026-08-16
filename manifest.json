@@ -19,7 +19,14 @@
     "128": "icons/icon128.png"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "commands": {
+    "close-duplicate-tabs": {
+      "suggested_key": { "default": "Ctrl+Shift+D" },
+      "description": "Fechar abas duplicadas (URL idêntica), mantendo a mais recente"
+    }
   },
   "permissions": ["tabs", "storage"],
   "minimum_chrome_version": "116"

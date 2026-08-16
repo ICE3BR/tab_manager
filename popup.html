@@ -13,17 +13,24 @@
       <option value="title">Título</option>
       <option value="domain">Domínio</option>
     </select>
+    <button id="mergeWindowsBtn" title="Mesclar todas as janelas nesta">⧉</button>
   </header>
 
   <nav class="view-tabs" role="tablist">
     <button class="view-tab active" data-view="all" role="tab" aria-selected="true">Todas as abas</button>
     <button class="view-tab" data-view="duplicates" role="tab" aria-selected="false">Duplicatas</button>
+    <button class="view-tab" data-view="sessions" role="tab" aria-selected="false">Sessões</button>
   </nav>
 
   <div id="duplicateModeBar" class="duplicate-mode-bar" hidden>
     <span>Agrupar por:</span>
     <button class="mode-btn active" data-mode="site">Mesmo site</button>
     <button class="mode-btn" data-mode="url">URL idêntica</button>
+  </div>
+
+  <div id="sessionBar" class="duplicate-mode-bar" hidden>
+    <input id="sessionName" type="text" placeholder="Nome da sessão..." autocomplete="off" />
+    <button id="saveSessionBtn">Salvar janela atual</button>
   </div>
 
   <main id="list" class="tab-list" aria-live="polite"></main>

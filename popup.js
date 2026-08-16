@@ -1,18 +1,25 @@
 import { getAllTabs } from "./src/tabs.js";
-import { closeTabs, closeOthers, focusTab } from "./src/actions.js";
+import { closeTabs, closeOthers, focusTab, togglePinned, toggleMuted, discardTab } from "./src/actions.js";
 import { createState, loadPrefs, savePrefs } from "./src/state.js";
-import { render, renderFooter, visibleTabIdsFor } from "./src/render.js";
+import { render, renderFooter, renderSessionsView, visibleTabIdsFor } from "./src/render.js";
+import { saveSession, listSessions, deleteSession, restoreSession } from "./src/sessions.js";
+import { mergeAllWindowsInto } from "./src/windows.js";
 
 const state = createState();
 let allTabs = [];
+let sessions = [];
 
 const el = {
   search: document.getElementById("search"),
   sortBy: document.getElementById("sortBy"),
+  mergeWindowsBtn: document.getElementById("mergeWindowsBtn"),
   list: document.getElementById("list"),
   viewTabs: document.querySelectorAll(".view-tab"),
   duplicateModeBar: document.getElementById("duplicateModeBar"),
   modeBtns: document.querySelectorAll(".mode-btn"),
+  sessionBar: document.getElementById("sessionBar"),
+  sessionName: document.getElementById("sessionName"),
+  saveSessionBtn: document.getElementById("saveSessionBtn"),
   selectAll: document.getElementById("selectAll"),
   selectionSummary: document.getElementById("selectionSummary"),
   closeSelectedBtn: document.getElementById("closeSelectedBtn"),
@@ -20,7 +27,11 @@ const el = {
 };
 
 function refreshUI() {
-  render(el.list, allTabs, state);
+  if (state.view === "sessions") {
+    renderSessionsView(el.list, sessions);
+  } else {
+    render(el.list, allTabs, state);
+  }
   renderFooter(
     {
       selectAllEl: el.selectAll,
@@ -29,7 +40,7 @@ function refreshUI() {
       closeOthersBtn: el.closeOthersBtn,
     },
     state,
-    visibleTabIdsFor(allTabs, state)
+    state.view === "sessions" ? [] : visibleTabIdsFor(allTabs, state)
   );
 }
 
@@ -54,16 +65,35 @@ el.sortBy.addEventListener("change", async () => {
 });
 
 for (const btn of el.viewTabs) {
-  btn.addEventListener("click", () => {
+  btn.addEventListener("click", async () => {
     state.view = btn.dataset.view;
     for (const b of el.viewTabs) {
       b.classList.toggle("active", b === btn);
       b.setAttribute("aria-selected", b === btn ? "true" : "false");
     }
     el.duplicateModeBar.hidden = state.view !== "duplicates";
+    el.sessionBar.hidden = state.view !== "sessions";
+    if (state.view === "sessions") {
+      sessions = await listSessions();
+    }
     refreshUI();
   });
 }
+
+el.saveSessionBtn.addEventListener("click", async () => {
+  const current = await chrome.windows.getCurrent();
+  const tabsInWindow = allTabs.filter((t) => t.windowId === current.id);
+  await saveSession(el.sessionName.value, tabsInWindow);
+  el.sessionName.value = "";
+  sessions = await listSessions();
+  refreshUI();
+});
+
+el.mergeWindowsBtn.addEventListener("click", async () => {
+  const current = await chrome.windows.getCurrent();
+  await mergeAllWindowsInto(current.id, allTabs);
+  await reloadTabs();
+});
 
 for (const btn of el.modeBtns) {
   btn.addEventListener("click", async () => {
@@ -75,6 +105,51 @@ for (const btn of el.modeBtns) {
 }
 
 el.list.addEventListener("click", async (ev) => {
+  const restoreBtn = ev.target.closest(".restore-session-btn");
+  if (restoreBtn) {
+    ev.stopPropagation();
+    const session = sessions.find((s) => s.id === restoreBtn.dataset.sessionId);
+    if (session) await restoreSession(session);
+    return;
+  }
+
+  const deleteSessionBtn = ev.target.closest(".delete-session-btn");
+  if (deleteSessionBtn) {
+    ev.stopPropagation();
+    sessions = await deleteSession(deleteSessionBtn.dataset.sessionId);
+    refreshUI();
+    return;
+  }
+
+  const pinBtn = ev.target.closest(".pin-tab-btn");
+  if (pinBtn) {
+    ev.stopPropagation();
+    const tab = allTabs.find((t) => t.id === Number(pinBtn.dataset.tabId));
+    if (tab) {
+      await togglePinned(tab);
+      await reloadTabs();
+    }
+    return;
+  }
+
+  const muteBtn = ev.target.closest(".mute-tab-btn");
+  if (muteBtn) {
+    ev.stopPropagation();
+    const tab = allTabs.find((t) => t.id === Number(muteBtn.dataset.tabId));
+    if (tab) {
+      await toggleMuted(tab);
+      await reloadTabs();
+    }
+    return;
+  }
+
+  const discardBtn = ev.target.closest(".discard-tab-btn");
+  if (discardBtn) {
+    ev.stopPropagation();
+    await discardTab(Number(discardBtn.dataset.tabId));
+    return;
+  }
+
   const closeBtn = ev.target.closest(".close-tab-btn");
   if (closeBtn) {
     ev.stopPropagation();
