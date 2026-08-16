@@ -23,6 +23,10 @@ export async function toggleMuted(tab) {
   await chrome.tabs.update(tab.id, { muted: !tab.muted });
 }
 
+// Returns true if the tab was actually discarded. Chrome silently refuses to
+// discard the active tab (and already-discarded tabs stay discarded), so the
+// caller needs this signal to tell the user whether anything happened.
 export async function discardTab(id) {
-  await chrome.tabs.discard(id);
+  const tab = await chrome.tabs.discard(id);
+  return !!(tab && tab.discarded);
 }

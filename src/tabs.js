@@ -12,6 +12,7 @@ export async function getAllTabs() {
       active: !!t.active,
       pinned: !!t.pinned,
       muted: !!(t.mutedInfo && t.mutedInfo.muted),
+      discarded: !!t.discarded,
       index: t.index,
     }))
     .sort((a, b) => a.windowId - b.windowId || a.index - b.index);
