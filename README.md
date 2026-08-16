@@ -22,6 +22,12 @@ Extensão leve para Chrome/Chromium (Manifest V3) para gerenciar abas: buscar, o
 - Mesclar todas as janelas na janela atual (botão ⧉ na barra superior).
 - Atalho de teclado (`Ctrl+Shift+D` por padrão, configurável em `chrome://extensions/shortcuts`) para fechar automaticamente as duplicatas de URL idêntica, mantendo a mais recente.
 
+### Fase 3
+
+- Clique direito numa aba seleciona ela; Shift + clique direito seleciona um intervalo — sem abrir o menu nativo do navegador.
+- Menu de contexto ao clicar direito no ícone da extensão: "Abrir em aba própria" (reabre a mesma aba se já estiver aberta, em vez de duplicar), "Abrir popup", e atalho direto para `chrome://extensions/shortcuts`.
+- Painel de configurações (⚙): visualização em **Lista** ou **Grade** (grade de favicons), e tema **Escuro**/**Claro** — preferências persistidas.
+
 ## Instalação (modo desenvolvedor)
 
 1. Abra `chrome://extensions`.
@@ -39,8 +45,9 @@ Extensão leve para Chrome/Chromium (Manifest V3) para gerenciar abas: buscar, o
 - `src/actions.js` — fechar/focar/pin/mute/suspender abas.
 - `src/windows.js` — mesclar janelas e mover abas entre janelas.
 - `src/sessions.js` — salvar/listar/excluir/restaurar sessões (`chrome.storage.local`).
+- `src/contextMenu.js` — lógica de "abrir em aba própria" (reaproveita `popup.html`) e "abrir popup" para o menu de contexto do ícone.
 - `src/render.js` — renderização da lista e das sessões.
-- `src/state.js` — estado da UI e preferências persistidas.
+- `src/state.js` — estado da UI, preferências persistidas (ordenação, modo de duplicata, visualização, tema) e seleção por intervalo.
 
 Sem build step: é JavaScript puro com módulos ES, carregado diretamente pelo navegador.
 
