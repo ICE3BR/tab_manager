@@ -48,13 +48,19 @@ async function updateBadge() {
 chrome.action.setBadgeBackgroundColor({ color: "#2f6fed" });
 
 chrome.tabs.onCreated.addListener(async (tab) => {
-  if (prefs.tabLimit) {
+  // Don't trust the module-level `prefs` cache here: MV3 service workers are
+  // killed after ~30s idle and restart on the next event, so the tab that
+  // wakes the worker up can run before refreshPrefs()'s async load resolves,
+  // silently skipping the limit for exactly one tab. Load fresh every time.
+  const currentPrefs = await loadPrefs(createState());
+  if (currentPrefs.tabLimit) {
     const windowTabs = await chrome.tabs.query({ windowId: tab.windowId });
     const countBeforeThisTab = countTabsExcluding(windowTabs, tab.id);
-    if (shouldMoveToNewWindow(countBeforeThisTab, prefs.tabLimit)) {
+    if (shouldMoveToNewWindow(countBeforeThisTab, currentPrefs.tabLimit)) {
       await chrome.windows.create({ tabId: tab.id });
     }
   }
+  prefs = currentPrefs;
   await updateBadge();
 });
 chrome.tabs.onRemoved.addListener(updateBadge);
@@ -76,5 +82,5 @@ chrome.commands.onCommand.addListener(async (command) => {
   await closeTabs(computeAutoCloseIds(tabs));
 });
 
-refreshPrefs();
+await refreshPrefs();
 setupContextMenus();
