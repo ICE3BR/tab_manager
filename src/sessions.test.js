@@ -1,7 +1,16 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { installChromeMock } from "./test-helpers/chromeMock.js";
-import { createSession, saveSession, listSessions, deleteSession, restoreSession } from "./sessions.js";
+import {
+  createSession,
+  saveSession,
+  listSessions,
+  deleteSession,
+  restoreSession,
+  exportSessionsJson,
+  parseImportedSessions,
+  importSessions,
+} from "./sessions.js";
 
 describe("createSession", () => {
   test("builds a deterministic session from tabs when id/createdAt are given", () => {
@@ -67,5 +76,57 @@ describe("restoreSession", () => {
     const { calls } = installChromeMock();
     await restoreSession(createSession("Vazia", [], { id: "s1", createdAt: 1 }));
     assert.equal(calls.windowsCreate.length, 0);
+  });
+});
+
+describe("exportSessionsJson", () => {
+  test("serializes sessions to formatted JSON", () => {
+    const sessions = [createSession("A", [{ url: "https://a.com", title: "A" }], { id: "s1", createdAt: 1 })];
+    const json = exportSessionsJson(sessions);
+    assert.deepEqual(JSON.parse(json), sessions);
+  });
+});
+
+describe("parseImportedSessions", () => {
+  test("keeps only entries shaped like a session, regenerating their id", () => {
+    const json = JSON.stringify([
+      { id: "old-1", name: "Válida", createdAt: 1, tabs: [{ url: "https://a.com", title: "A", pinned: false }] },
+      { name: "Sem tabs" },
+      "not an object",
+    ]);
+    const result = parseImportedSessions(json, { makeId: () => "new-id" });
+    assert.equal(result.length, 1);
+    assert.equal(result[0].id, "new-id");
+    assert.equal(result[0].name, "Válida");
+    assert.deepEqual(result[0].tabs, [{ url: "https://a.com", title: "A", pinned: false }]);
+  });
+
+  test("returns an empty array for malformed JSON", () => {
+    assert.deepEqual(parseImportedSessions("{not json"), []);
+  });
+
+  test("returns an empty array when the JSON isn't an array", () => {
+    assert.deepEqual(parseImportedSessions(JSON.stringify({ foo: "bar" })), []);
+  });
+});
+
+describe("importSessions", () => {
+  test("merges valid imported sessions in front of the existing ones", async () => {
+    installChromeMock();
+    await saveSession("Existente", [], { id: "s1", createdAt: 1 });
+
+    const json = JSON.stringify([{ name: "Importada", createdAt: 2, tabs: [{ url: "https://a.com", title: "A" }] }]);
+    const result = await importSessions(json, { makeId: () => "imported-id" });
+
+    assert.deepEqual(result.map((s) => s.id), ["imported-id", "s1"]);
+  });
+
+  test("leaves storage untouched when nothing valid is imported", async () => {
+    installChromeMock();
+    await saveSession("Existente", [], { id: "s1", createdAt: 1 });
+
+    const result = await importSessions("not json");
+
+    assert.deepEqual(result.map((s) => s.id), ["s1"]);
   });
 });

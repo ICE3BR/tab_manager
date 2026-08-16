@@ -10,6 +10,14 @@ describe("createState", () => {
     assert.equal(state.theme, "dark");
     assert.equal(state.selected.size, 0);
   });
+
+  test("defaults include the Fase 4 options (tab limit disabled, titles/badge on, popup mode)", () => {
+    const state = createState();
+    assert.equal(state.tabLimit, 0);
+    assert.equal(state.windowTitles, true);
+    assert.equal(state.badge, true);
+    assert.equal(state.openInOwnTab, false);
+  });
 });
 
 describe("prefs persistence", () => {
@@ -21,6 +29,18 @@ describe("prefs persistence", () => {
     const state = await loadPrefs(createState());
     assert.equal(state.viewMode, "grid");
     assert.equal(state.theme, "light");
+  });
+
+  test("loadPrefs applies stored tabLimit/windowTitles/badge/openInOwnTab over the defaults", async () => {
+    installChromeMock();
+    await chrome.storage.local.set({
+      tabManagerLitePrefs: { tabLimit: 15, windowTitles: false, badge: false, openInOwnTab: true },
+    });
+    const state = await loadPrefs(createState());
+    assert.equal(state.tabLimit, 15);
+    assert.equal(state.windowTitles, false);
+    assert.equal(state.badge, false);
+    assert.equal(state.openInOwnTab, true);
   });
 
   test("savePrefs persists viewMode and theme alongside the existing prefs", async () => {
@@ -35,6 +55,10 @@ describe("prefs persistence", () => {
       duplicateMode: "site",
       viewMode: "grid",
       theme: "light",
+      tabLimit: 0,
+      windowTitles: true,
+      badge: true,
+      openInOwnTab: false,
     });
   });
 });
