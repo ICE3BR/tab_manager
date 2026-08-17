@@ -1,5 +1,15 @@
 import { getAllTabs } from "./src/tabs.js";
-import { closeTabs, closeOthers, focusTab, togglePinned, toggleMuted, discardTab } from "./src/actions.js";
+import {
+  closeTabs,
+  closeOthers,
+  focusTab,
+  togglePinned,
+  toggleMuted,
+  discardTab,
+  bulkPin,
+  bulkMute,
+  bulkDiscard,
+} from "./src/actions.js";
 import { createState, loadPrefs, savePrefs, idsInRange, decideEnterAction } from "./src/state.js";
 import { render, renderFooter, renderSessionsView, visibleTabIdsFor } from "./src/render.js";
 import { saveSession, listSessions, deleteSession, restoreSession } from "./src/sessions.js";
@@ -31,6 +41,11 @@ const el = {
   closeOthersBtn: document.getElementById("closeOthersBtn"),
   statusMsg: document.getElementById("statusMsg"),
   sessionsTabBtn: document.querySelector('.view-tab[data-view="sessions"]'),
+  bulkActionsBar: document.getElementById("bulkActionsBar"),
+  bulkPinBtn: document.getElementById("bulkPinBtn"),
+  bulkMuteBtn: document.getElementById("bulkMuteBtn"),
+  bulkDiscardBtn: document.getElementById("bulkDiscardBtn"),
+  bulkCloseBtn: document.getElementById("bulkCloseBtn"),
 };
 
 function applyViewMode() {
@@ -83,6 +98,7 @@ function refreshUI() {
       summaryEl: el.selectionSummary,
       closeSelectedBtn: el.closeSelectedBtn,
       closeOthersBtn: el.closeOthersBtn,
+      bulkActionsBar: el.bulkActionsBar,
     },
     state,
     state.view === "sessions" ? [] : visibleTabIdsFor(allTabs, state)
@@ -323,6 +339,32 @@ el.closeOthersBtn.addEventListener("click", async () => {
   const [id] = [...state.selected];
   if (id == null) return;
   await closeOthers(id, allTabs);
+});
+
+function selectedTabs() {
+  return allTabs.filter((t) => state.selected.has(t.id));
+}
+
+el.bulkPinBtn.addEventListener("click", async () => {
+  await bulkPin(selectedTabs());
+  await reloadTabs();
+});
+
+el.bulkMuteBtn.addEventListener("click", async () => {
+  await bulkMute(selectedTabs());
+  await reloadTabs();
+});
+
+el.bulkDiscardBtn.addEventListener("click", async () => {
+  const succeeded = await bulkDiscard([...state.selected]);
+  showStatus(`${succeeded} de ${state.selected.size} aba(s) suspensa(s).`);
+  await reloadTabs();
+});
+
+el.bulkCloseBtn.addEventListener("click", async () => {
+  const ids = [...state.selected];
+  state.selected.clear();
+  await closeTabs(ids);
 });
 
 chrome.tabs.onRemoved.addListener(reloadTabs);

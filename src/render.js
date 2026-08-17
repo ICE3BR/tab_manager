@@ -142,7 +142,11 @@ export function visibleTabIdsFor(tabs, state) {
   return filtered.map((t) => t.id);
 }
 
-export function renderFooter({ selectAllEl, summaryEl, closeSelectedBtn, closeOthersBtn }, state, visibleTabIds) {
+export function renderFooter(
+  { selectAllEl, summaryEl, closeSelectedBtn, closeOthersBtn, bulkActionsBar },
+  state,
+  visibleTabIds
+) {
   const selectedCount = state.selected.size;
   summaryEl.textContent = `${selectedCount} selecionada${selectedCount === 1 ? "" : "s"}`;
   closeSelectedBtn.disabled = selectedCount === 0;
@@ -150,4 +154,5 @@ export function renderFooter({ selectAllEl, summaryEl, closeSelectedBtn, closeOt
   const allVisibleSelected =
     visibleTabIds.length > 0 && visibleTabIds.every((id) => state.selected.has(id));
   selectAllEl.checked = allVisibleSelected;
+  if (bulkActionsBar) bulkActionsBar.hidden = selectedCount === 0;
 }
