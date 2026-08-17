@@ -30,3 +30,29 @@ export async function discardTab(id) {
   const tab = await chrome.tabs.discard(id);
   return !!(tab && tab.discarded);
 }
+
+// Bulk pin/mute for a multi-selection: if every tab in the selection is
+// already pinned/muted, undo it for all of them; otherwise apply it to all
+// of them. Avoids the ambiguity of toggling each tab independently when the
+// selection has mixed states. Returns the state that was applied.
+export async function bulkPin(tabs) {
+  const pinned = !tabs.every((t) => t.pinned);
+  for (const tab of tabs) await chrome.tabs.update(tab.id, { pinned });
+  return pinned;
+}
+
+export async function bulkMute(tabs) {
+  const muted = !tabs.every((t) => t.muted);
+  for (const tab of tabs) await chrome.tabs.update(tab.id, { muted });
+  return muted;
+}
+
+// Discards every given tab id, returning how many actually succeeded (some
+// may silently fail, e.g. the active tab — see discardTab).
+export async function bulkDiscard(ids) {
+  let succeeded = 0;
+  for (const id of ids) {
+    if (await discardTab(id)) succeeded++;
+  }
+  return succeeded;
+}
