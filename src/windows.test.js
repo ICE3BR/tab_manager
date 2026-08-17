@@ -1,7 +1,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { installChromeMock } from "./test-helpers/chromeMock.js";
-import { computeMergePlan, mergeAllWindowsInto, moveTabToWindow } from "./windows.js";
+import { computeMergePlan, mergeAllWindowsInto, moveTabToWindow, moveTabsToNewWindow } from "./windows.js";
 
 describe("computeMergePlan", () => {
   test("moves tabs from other windows into the target, leaves target's own tabs untouched", () => {
@@ -45,5 +45,26 @@ describe("moveTabToWindow", () => {
     const { calls } = installChromeMock();
     await moveTabToWindow(42, 7);
     assert.deepEqual(calls.tabsMove, [{ tabId: 42, moveProps: { windowId: 7, index: -1 } }]);
+  });
+});
+
+describe("moveTabsToNewWindow", () => {
+  test("creates a new window from the first tab, then moves the rest into it", async () => {
+    const { calls } = installChromeMock();
+    await moveTabsToNewWindow([1, 2, 3]);
+    assert.deepEqual(calls.windowsCreate, [{ tabId: 1 }]);
+    assert.deepEqual(
+      calls.tabsMove.map((c) => ({ tabId: c.tabId, windowId: c.moveProps.windowId })),
+      [
+        { tabId: 2, windowId: 9999 },
+        { tabId: 3, windowId: 9999 },
+      ]
+    );
+  });
+
+  test("does nothing for an empty list", async () => {
+    const { calls } = installChromeMock();
+    await moveTabsToNewWindow([]);
+    assert.equal(calls.windowsCreate.length, 0);
   });
 });

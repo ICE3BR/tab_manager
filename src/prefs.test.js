@@ -1,7 +1,14 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { installChromeMock } from "./test-helpers/chromeMock.js";
-import { shouldMoveToNewWindow, computeBadgeText, countTabsExcluding, applyTabLimit } from "./prefs.js";
+import {
+  shouldMoveToNewWindow,
+  computeBadgeText,
+  countTabsExcluding,
+  applyTabLimit,
+  clampPopupSize,
+  incognitoSettingsUrl,
+} from "./prefs.js";
 
 describe("shouldMoveToNewWindow", () => {
   test("never moves when the limit is disabled (0)", () => {
@@ -67,6 +74,27 @@ describe("applyTabLimit", () => {
     const moved = await applyTabLimit({ id: 999, windowId: 1 }, 2);
     assert.equal(moved, true);
     assert.deepEqual(calls.windowsCreate, [{ tabId: 999 }]);
+  });
+});
+
+describe("clampPopupSize", () => {
+  test("clamps width to [300, 800] and height to [400, 600]", () => {
+    assert.deepEqual(clampPopupSize({ width: 100, height: 100 }), { width: 300, height: 400 });
+    assert.deepEqual(clampPopupSize({ width: 5000, height: 5000 }), { width: 800, height: 600 });
+  });
+
+  test("passes valid values through unchanged", () => {
+    assert.deepEqual(clampPopupSize({ width: 500, height: 500 }), { width: 500, height: 500 });
+  });
+
+  test("falls back to the default size for non-numeric input", () => {
+    assert.deepEqual(clampPopupSize({ width: NaN, height: undefined }), { width: 380, height: 560 });
+  });
+});
+
+describe("incognitoSettingsUrl", () => {
+  test("builds the chrome://extensions details URL for the given extension id", () => {
+    assert.equal(incognitoSettingsUrl("abc123"), "chrome://extensions/?id=abc123");
   });
 });
 
