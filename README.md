@@ -38,6 +38,16 @@ Acessível em `chrome://extensions` → Detalhes → "Opções da extensão", ou
 - Backup de sessões: exportar para `.json` e importar de volta (mescla com as sessões existentes, sem sobrescrever).
 - Atalho para `chrome://extensions/shortcuts`.
 
+### Fase 5 — Opções: paridade completa com o Tab Manager Plus
+
+- Tamanho do popup (largura/altura, até 800×600).
+- Modo escuro, modo compacto e animações — configuráveis na própria página de Opções (o modo escuro/claro também continua disponível no painel ⚙ do popup).
+- Habilitar/desabilitar a aba "Sessões" inteira.
+- Mostrar/esconder os botões de ação (fixar, silenciar, suspender, fechar) das linhas.
+- Link direto para liberar a extensão no modo anônimo (`chrome://extensions/?id=...`).
+- Clique do meio numa aba fecha ela; `Enter` foca a aba selecionada, ou move todas as abas selecionadas para uma janela nova quando há mais de uma.
+- "Minimizar janelas inativas" da referência foi deixado de fora (exigiria a permissão opcional `system.display` para um ganho pequeno).
+
 ## Instalação (modo desenvolvedor)
 
 1. Abra `chrome://extensions`.
