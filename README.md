@@ -48,6 +48,10 @@ Acessível em `chrome://extensions` → Detalhes → "Opções da extensão", ou
 - Clique do meio numa aba fecha ela; `Enter` foca a aba selecionada, ou move todas as abas selecionadas para uma janela nova quando há mais de uma.
 - "Minimizar janelas inativas" da referência foi deixado de fora (exigiria a permissão opcional `system.display` para um ganho pequeno).
 
+### Ações em lote
+
+Ao selecionar uma ou mais abas, uma barra aparece abaixo do resumo de seleção com fixar/silenciar/suspender/fechar aplicados a todas as abas selecionadas de uma vez — em vez de repetir aba por aba.
+
 ## Instalação (modo desenvolvedor)
 
 1. Abra `chrome://extensions`.
