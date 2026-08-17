@@ -33,3 +33,25 @@ export async function applyTabLimit(tab, tabLimit) {
   await chrome.windows.create({ tabId: tab.id });
   return true;
 }
+
+const DEFAULT_POPUP_WIDTH = 380;
+const DEFAULT_POPUP_HEIGHT = 560;
+const POPUP_WIDTH_RANGE = { min: 300, max: 800 };
+const POPUP_HEIGHT_RANGE = { min: 400, max: 600 };
+
+function clamp(value, { min, max }, fallback) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
+export function clampPopupSize({ width, height }) {
+  return {
+    width: clamp(width, POPUP_WIDTH_RANGE, DEFAULT_POPUP_WIDTH),
+    height: clamp(height, POPUP_HEIGHT_RANGE, DEFAULT_POPUP_HEIGHT),
+  };
+}
+
+export function incognitoSettingsUrl(extensionId) {
+  return `chrome://extensions/?id=${extensionId}`;
+}

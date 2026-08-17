@@ -30,3 +30,15 @@ export async function mergeAllWindowsInto(targetWindowId, allTabs) {
 export async function moveTabToWindow(tabId, windowId) {
   await chrome.tabs.move(tabId, { windowId, index: -1 });
 }
+
+// Moves a set of tabs into a brand-new window together: the first tab
+// creates the window (chrome.windows.create moves an existing tab rather
+// than opening a blank one when given a tabId), the rest join it after.
+export async function moveTabsToNewWindow(tabIds) {
+  if (tabIds.length === 0) return;
+  const [firstId, ...restIds] = tabIds;
+  const newWindow = await chrome.windows.create({ tabId: firstId });
+  for (const tabId of restIds) {
+    await chrome.tabs.move(tabId, { windowId: newWindow.id, index: -1 });
+  }
+}

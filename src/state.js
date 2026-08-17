@@ -13,6 +13,12 @@ const defaultState = {
   windowTitles: true,
   badge: true,
   openInOwnTab: false,
+  popupWidth: 380,
+  popupHeight: 560,
+  compact: false,
+  animations: true,
+  sessionsEnabled: true,
+  showActionButtons: true,
   selected: new Set(),
   lastSelectedId: null,
 };
@@ -33,6 +39,12 @@ export async function loadPrefs(state) {
     if (typeof prefs.windowTitles === "boolean") state.windowTitles = prefs.windowTitles;
     if (typeof prefs.badge === "boolean") state.badge = prefs.badge;
     if (typeof prefs.openInOwnTab === "boolean") state.openInOwnTab = prefs.openInOwnTab;
+    if (typeof prefs.popupWidth === "number") state.popupWidth = prefs.popupWidth;
+    if (typeof prefs.popupHeight === "number") state.popupHeight = prefs.popupHeight;
+    if (typeof prefs.compact === "boolean") state.compact = prefs.compact;
+    if (typeof prefs.animations === "boolean") state.animations = prefs.animations;
+    if (typeof prefs.sessionsEnabled === "boolean") state.sessionsEnabled = prefs.sessionsEnabled;
+    if (typeof prefs.showActionButtons === "boolean") state.showActionButtons = prefs.showActionButtons;
   }
   return state;
 }
@@ -48,8 +60,23 @@ export async function savePrefs(state) {
       windowTitles: state.windowTitles,
       badge: state.badge,
       openInOwnTab: state.openInOwnTab,
+      popupWidth: state.popupWidth,
+      popupHeight: state.popupHeight,
+      compact: state.compact,
+      animations: state.animations,
+      sessionsEnabled: state.sessionsEnabled,
+      showActionButtons: state.showActionButtons,
     },
   });
+}
+
+// Decides what the Enter key should do given the current tab selection:
+// focus the single selected tab, move every selected tab to a new window
+// when there's more than one, or nothing when the selection is empty.
+export function decideEnterAction(selected) {
+  if (selected.size === 0) return { type: "none" };
+  if (selected.size === 1) return { type: "focus", id: [...selected][0] };
+  return { type: "moveToNewWindow", ids: [...selected] };
 }
 
 // Returns the ids between `fromId` and `toId` (inclusive), in the order they
