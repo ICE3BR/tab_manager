@@ -116,3 +116,16 @@ button,
   background: var(--bg);
   border: 1px solid var(--border);
 }
+
+.link-btn + .link-btn {
+  margin-left: 8px;
+}
+
+.help-block h4 {
+  margin: 12px 0 2px;
+  font-size: 13px;
+}
+
+.help-block h4:first-child {
+  margin-top: 0;
+}

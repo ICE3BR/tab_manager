@@ -1,9 +1,9 @@
 import { getAllTabs } from "./src/tabs.js";
 import { closeTabs, closeOthers, focusTab, togglePinned, toggleMuted, discardTab } from "./src/actions.js";
-import { createState, loadPrefs, savePrefs, idsInRange } from "./src/state.js";
+import { createState, loadPrefs, savePrefs, idsInRange, decideEnterAction } from "./src/state.js";
 import { render, renderFooter, renderSessionsView, visibleTabIdsFor } from "./src/render.js";
 import { saveSession, listSessions, deleteSession, restoreSession } from "./src/sessions.js";
-import { mergeAllWindowsInto } from "./src/windows.js";
+import { mergeAllWindowsInto, moveTabsToNewWindow } from "./src/windows.js";
 
 const state = createState();
 let allTabs = [];
@@ -30,6 +30,7 @@ const el = {
   closeSelectedBtn: document.getElementById("closeSelectedBtn"),
   closeOthersBtn: document.getElementById("closeOthersBtn"),
   statusMsg: document.getElementById("statusMsg"),
+  sessionsTabBtn: document.querySelector('.view-tab[data-view="sessions"]'),
 };
 
 function applyViewMode() {
@@ -40,6 +41,24 @@ function applyViewMode() {
 function applyTheme() {
   document.documentElement.dataset.theme = state.theme;
   for (const b of el.themeBtns) b.classList.toggle("active", b.dataset.themeOption === state.theme);
+}
+
+function applyAppearancePrefs() {
+  const root = document.documentElement;
+  root.classList.toggle("compact", state.compact);
+  root.classList.toggle("no-animations", !state.animations);
+  root.classList.toggle("hide-action-buttons", !state.showActionButtons);
+
+  // Popup size only makes sense for the actual small popup, not "open in own tab" mode.
+  if (!root.classList.contains("is-tab")) {
+    root.style.setProperty("--popup-width", `${state.popupWidth}px`);
+    root.style.setProperty("--popup-height", `${state.popupHeight}px`);
+  }
+
+  el.sessionsTabBtn.hidden = !state.sessionsEnabled;
+  if (!state.sessionsEnabled && state.view === "sessions") {
+    el.sessionsTabBtn.classList.remove("active");
+  }
 }
 
 let statusTimer;
@@ -251,6 +270,33 @@ el.list.addEventListener("contextmenu", (ev) => {
   refreshUI();
 });
 
+el.list.addEventListener("auxclick", async (ev) => {
+  if (ev.button !== 1) return;
+  const row = ev.target.closest(".tab-row");
+  if (!row) return;
+  ev.preventDefault();
+  const id = Number(row.dataset.tabId);
+  state.selected.delete(id);
+  await closeTabs([id]);
+});
+
+document.addEventListener("keydown", async (ev) => {
+  if (ev.key !== "Enter") return;
+  const target = ev.target;
+  if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT")) return;
+  if (state.view === "sessions") return;
+
+  const action = decideEnterAction(state.selected);
+  if (action.type === "focus") {
+    const tab = allTabs.find((t) => t.id === action.id);
+    if (tab) await focusTab(tab);
+  } else if (action.type === "moveToNewWindow") {
+    await moveTabsToNewWindow(action.ids);
+    state.selected.clear();
+    await reloadTabs();
+  }
+});
+
 el.selectAll.addEventListener("change", () => {
   const ids = visibleTabIdsFor(allTabs, state);
   if (el.selectAll.checked) {
@@ -287,5 +333,6 @@ if (new URLSearchParams(location.search).get("tab") === "true") {
   for (const b of el.modeBtns) b.classList.toggle("active", b.dataset.mode === state.duplicateMode);
   applyViewMode();
   applyTheme();
+  applyAppearancePrefs();
   await reloadTabs();
 })();

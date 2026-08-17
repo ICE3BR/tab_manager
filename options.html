@@ -25,11 +25,51 @@
     </section>
 
     <section class="card">
-      <h2>Interface</h2>
+      <h2>Tamanho do popup</h2>
+      <p class="hint">
+        Redimensione o popup até o limite de 800×600 (limitação do próprio navegador). Para uma visão maior, use "Abrir
+        em aba própria" no menu de contexto do ícone da extensão.
+      </p>
+      <label class="field">
+        <span>Largura do popup</span>
+        <input type="number" id="popupWidth" min="300" max="800" step="10" />
+      </label>
+      <label class="field">
+        <span>Altura do popup</span>
+        <input type="number" id="popupHeight" min="400" max="600" step="10" />
+      </label>
+    </section>
+
+    <section class="card">
+      <h2>Estilo da janela</h2>
+      <label class="toggle-field">
+        <input type="checkbox" id="darkMode" />
+        <span>Modo escuro</span>
+      </label>
+      <label class="toggle-field">
+        <input type="checkbox" id="compact" />
+        <span>Modo compacto (menos espaço ao redor dos ícones)</span>
+      </label>
+      <label class="toggle-field">
+        <input type="checkbox" id="animations" />
+        <span>Animações e transições</span>
+      </label>
       <label class="toggle-field">
         <input type="checkbox" id="windowTitles" />
         <span>Mostrar títulos de janela na lista</span>
       </label>
+    </section>
+
+    <section class="card">
+      <h2>Gerenciamento de sessões</h2>
+      <label class="toggle-field">
+        <input type="checkbox" id="sessionsEnabled" />
+        <span>Habilitar sessões (mostra a aba "Sessões" no popup)</span>
+      </label>
+    </section>
+
+    <section class="card">
+      <h2>Ícone do popup</h2>
       <label class="toggle-field">
         <input type="checkbox" id="badge" />
         <span>Mostrar contador de abas no ícone da extensão</span>
@@ -37,6 +77,14 @@
       <label class="toggle-field">
         <input type="checkbox" id="openInOwnTab" />
         <span>Abrir em aba própria por padrão (em vez do popup pequeno)</span>
+      </label>
+    </section>
+
+    <section class="card">
+      <h2>Configurações de janela</h2>
+      <label class="toggle-field">
+        <input type="checkbox" id="showActionButtons" />
+        <span>Mostrar botões de ação (fixar, silenciar, suspender, fechar)</span>
       </label>
     </section>
 
@@ -55,6 +103,21 @@
     <section class="card">
       <h2>Avançado</h2>
       <button id="shortcutsBtn" type="button" class="link-btn">⌨️ Alterar atalhos de teclado</button>
+      <button id="incognitoBtn" type="button" class="link-btn">🕵️ Permitir em modo anônimo</button>
+    </section>
+
+    <section class="card">
+      <h2>Mouse e teclado</h2>
+      <div class="help-block">
+        <h4>Botão direito do mouse</h4>
+        <p class="hint">Seleciona a aba.</p>
+        <h4>Shift + botão direito</h4>
+        <p class="hint">Seleciona todas as abas entre a última selecionada e a atual.</p>
+        <h4>Botão do meio</h4>
+        <p class="hint">Fecha a aba.</p>
+        <h4>Enter</h4>
+        <p class="hint">Foca a aba selecionada, ou move todas as abas selecionadas para uma janela nova.</p>
+      </div>
     </section>
   </main>
 

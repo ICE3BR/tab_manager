@@ -17,8 +17,8 @@
 html, body {
   margin: 0;
   padding: 0;
-  width: 380px;
-  max-height: 560px;
+  width: var(--popup-width, 380px);
+  max-height: var(--popup-height, 560px);
   background: var(--bg);
   color: var(--text);
   font: 13px/1.4 -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -246,6 +246,7 @@ html, body {
   gap: 8px;
   padding: 6px 10px;
   cursor: pointer;
+  transition: background-color 120ms ease;
 }
 
 .tab-row:hover {
@@ -283,6 +284,7 @@ html, body {
   display: flex;
   gap: 4px;
   opacity: 0;
+  transition: opacity 120ms ease;
 }
 
 .tab-row:hover .row-actions {
@@ -421,4 +423,27 @@ html.is-tab body {
 #list.view-grid .tab-row .title {
   font-size: 10px;
   text-align: center;
+}
+
+/* Compact mode: tighter rows */
+html.compact .tab-row {
+  padding: 3px 10px;
+}
+
+html.compact .toolbar,
+html.compact .view-tab,
+html.compact .duplicate-mode-bar {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+/* Animations toggle: off by default disables all transitions */
+html.no-animations,
+html.no-animations * {
+  transition: none !important;
+}
+
+/* Show action buttons toggle */
+html.hide-action-buttons .tab-row .row-actions {
+  display: none !important;
 }
