@@ -70,14 +70,29 @@ Same documented gap as Fases 2–4: `options.html`/`options.js`, `render.js`, `p
 
 ## Manual Verification Checklist (browser)
 
-- [ ] Ajustar largura/altura do popup em Opções → o popup normal reflete o novo tamanho; o modo "aba própria" continua livre (ignora esses valores).
-- [ ] Alternar Escuro/Compacto/Animações em Opções → reflete no popup imediatamente na próxima abertura.
-- [ ] Desabilitar "Habilitar sessões" → a aba "Sessões" some do popup.
-- [ ] Desabilitar "Mostrar botões de ação" → pin/mute/suspender/fechar somem das linhas.
-- [ ] "Permitir em modo anônimo" abre `chrome://extensions/?id=<id>` com a extensão certa focada.
-- [ ] Clique do meio numa aba fecha ela.
-- [ ] Selecionar 1 aba + Enter → foca ela. Selecionar 2+ abas + Enter → todas vão para uma janela nova.
-- [ ] Enter dentro do campo de busca ou do nome da sessão **não** deve disparar a ação (deve digitar normalmente).
+- [X] Ajustar largura/altura do popup em Opções → o popup normal reflete o novo tamanho; o modo "aba própria" continua livre (ignora esses valores).
+- [X] Alternar Escuro/Compacto/Animações em Opções → reflete no popup imediatamente na próxima abertura.
+- [X] Desabilitar "Habilitar sessões" → a aba "Sessões" some do popup.
+- [X] Desabilitar "Mostrar botões de ação" → pin/mute/suspender/fechar somem das linhas.
+- [X] "Permitir em modo anônimo" abre `chrome://extensions/?id=<id>` com a extensão certa focada.
+- [X] Clique do meio numa aba fecha ela (corrigido — ver "Bug Fix" abaixo).
+- [X] Selecionar 1 aba + Enter → foca ela. Selecionar 2+ abas + Enter → todas vão para uma janela nova.
+- [X] Enter dentro do campo de busca ou do nome da sessão **não** deve disparar a ação (deve digitar normalmente).
+
+## Bug Fix: middle-click started native autoscroll instead of closing the tab
+
+**Reported**: clicking the middle button on a tab row triggered Chrome's native autoscroll mode (the small scroll icon, drag-to-scroll) instead of closing the tab.
+
+**Root cause**: the close logic was wired to `auxclick`, which only fires *after* `mousedown`/`mouseup` complete — but Chrome starts native middle-click autoscroll on `mousedown` itself, before `auxclick` ever runs. Calling `preventDefault()` inside the `auxclick` handler was too late to stop it.
+
+**Fix**: added a `mousedown` listener on `#list` that calls `preventDefault()` for `ev.button === 1` over a `.tab-row`, before autoscroll can engage. The `auxclick` handler still does the actual close.
+
+This lives entirely in `popup.js` (the untested DOM/orchestration layer — see the documented gap above); it's inherently a real-browser-only behavior (native autoscroll isn't something `node:test` can exercise), so it was caught and verified via the manual checklist rather than an automated test.
+
+```
+node --test
+ℹ tests 67, pass 67, fail 0
+```
 
 ## Merge Evidence
 
@@ -85,3 +100,4 @@ Checkpoint commits kept as-is (not squashed):
 - `8ddd938` — RED: Fase 5 tests added, failing for the intended reasons.
 - `dac694d` — GREEN: minimal implementation, 67/67 tests passing.
 - `989c948` — Options page + popup UI wiring (untested DOM/orchestration layer, same documented gap).
+- (this fix) — `mousedown` preventDefault for middle-click, stopping native autoscroll before it engages.

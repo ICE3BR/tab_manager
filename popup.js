@@ -270,6 +270,12 @@ el.list.addEventListener("contextmenu", (ev) => {
   refreshUI();
 });
 
+// Chrome starts native autoscroll on middle-button mousedown, before
+// auxclick ever fires — has to be prevented here, not in the click handler.
+el.list.addEventListener("mousedown", (ev) => {
+  if (ev.button === 1 && ev.target.closest(".tab-row")) ev.preventDefault();
+});
+
 el.list.addEventListener("auxclick", async (ev) => {
   if (ev.button !== 1) return;
   const row = ev.target.closest(".tab-row");
