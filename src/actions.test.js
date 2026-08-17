@@ -1,7 +1,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { installChromeMock } from "./test-helpers/chromeMock.js";
-import { closeTabs, closeOthers, togglePinned, toggleMuted, discardTab } from "./actions.js";
+import { closeTabs, closeOthers, togglePinned, toggleMuted, discardTab, bulkPin, bulkMute, bulkDiscard } from "./actions.js";
 
 describe("closeTabs", () => {
   test("does nothing for an empty id list", async () => {
@@ -43,6 +43,58 @@ describe("toggleMuted", () => {
     const { calls } = installChromeMock();
     await toggleMuted({ id: 5, muted: true });
     assert.deepEqual(calls.tabsUpdate, [{ tabId: 5, changes: { muted: false } }]);
+  });
+});
+
+describe("bulkPin", () => {
+  test("pins every tab when at least one of them isn't pinned yet", async () => {
+    const { calls } = installChromeMock();
+    const tabs = [{ id: 1, pinned: true }, { id: 2, pinned: false }];
+    const pinned = await bulkPin(tabs);
+    assert.equal(pinned, true);
+    assert.deepEqual(calls.tabsUpdate, [
+      { tabId: 1, changes: { pinned: true } },
+      { tabId: 2, changes: { pinned: true } },
+    ]);
+  });
+
+  test("unpins every tab when all of them are already pinned", async () => {
+    const { calls } = installChromeMock();
+    const tabs = [{ id: 1, pinned: true }, { id: 2, pinned: true }];
+    const pinned = await bulkPin(tabs);
+    assert.equal(pinned, false);
+    assert.deepEqual(calls.tabsUpdate, [
+      { tabId: 1, changes: { pinned: false } },
+      { tabId: 2, changes: { pinned: false } },
+    ]);
+  });
+});
+
+describe("bulkMute", () => {
+  test("mutes every tab when at least one of them isn't muted yet", async () => {
+    const { calls } = installChromeMock();
+    const tabs = [{ id: 1, muted: false }, { id: 2, muted: false }];
+    const muted = await bulkMute(tabs);
+    assert.equal(muted, true);
+    assert.deepEqual(calls.tabsUpdate, [
+      { tabId: 1, changes: { muted: true } },
+      { tabId: 2, changes: { muted: true } },
+    ]);
+  });
+
+  test("unmutes every tab when all of them are already muted", async () => {
+    const { calls } = installChromeMock();
+    const tabs = [{ id: 1, muted: true }, { id: 2, muted: true }];
+    const muted = await bulkMute(tabs);
+    assert.equal(muted, false);
+  });
+});
+
+describe("bulkDiscard", () => {
+  test("discards every tab it can and returns how many succeeded", async () => {
+    installChromeMock({ tabs: [{ id: 1, active: false }, { id: 2, active: true }, { id: 3, active: false }] });
+    const succeeded = await bulkDiscard([1, 2, 3]);
+    assert.equal(succeeded, 2);
   });
 });
 
