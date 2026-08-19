@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Tab Manager Lite",
-  "version": "0.1.0",
-  "description": "Gerenciador de abas leve: buscar, ordenar, fechar e encontrar duplicatas por site ou por URL completa.",
+  "version": "1.0.0",
+  "description": "Gerenciador de abas leve: busca, duplicatas por site ou URL exata, sessões, opções completas e atalhos de teclado.",
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

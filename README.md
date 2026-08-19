@@ -1,6 +1,6 @@
 # Tab Manager Lite
 
-Extensão leve para Chrome/Chromium (Manifest V3) para gerenciar abas: buscar, ordenar, fechar e encontrar duplicatas — por site ou por URL completa.
+Extensão leve para Chrome/Chromium (Manifest V3) para gerenciar abas — inspirada no [Tab Manager Plus for Chrome](https://github.com/stefanXO/Tab-Manager-Plus), reconstruída do zero em JavaScript puro sem framework/bundler.
 
 ## Funcionalidades
 
@@ -50,7 +50,28 @@ Acessível em `chrome://extensions` → Detalhes → "Opções da extensão", ou
 
 ### Ações em lote
 
-Ao selecionar uma ou mais abas, uma barra aparece abaixo do resumo de seleção com fixar/silenciar/suspender/fechar aplicados a todas as abas selecionadas de uma vez — em vez de repetir aba por aba.
+Ao selecionar uma ou mais abas, os botões de fixar/silenciar/suspender/fechar no rodapé passam a agir sobre todas as abas selecionadas de uma vez — em vez de repetir aba por aba.
+
+## Comparação com o Tab Manager Plus
+
+Não é uma cópia 1:1 — a ideia é ter as mesmas ferramentas do dia a dia, mais o que a referência não tem, num pacote mais leve. Baseado em análise direta do código-fonte deles (`TabManager.tsx`, `TabOptions.tsx`, `Tab.tsx`, `context_menus.ts`).
+
+**Temos igual (ou equivalente):** busca, duplicatas, sessões (+ backup export/import), limite de abas por janela, tamanho do popup, modo escuro/compacto/animações, títulos de janela, badge, abrir em aba própria, permitir modo anônimo, atalho de teclado, clique direito para selecionar (+ shift para intervalo), clique do meio para fechar, `Enter` para focar/mover seleção, pin/mute/suspender, mesclar janelas, menu de contexto no ícone.
+
+**Temos e eles não:** duplicatas por **URL exata** (não só por site/domínio — a motivação original deste projeto), ordenação por título/domínio/ordem de abertura, atalho de teclado dedicado para fechar duplicatas automaticamente, barra de ações em lote sempre visível no rodapé.
+
+**Eles têm e nós não (decisão consciente, não esquecimento):**
+- Arrastar e soltar abas para reordenar ou mover entre janelas específicas — hoje só temos "mesclar todas" e "mover selecionadas para uma janela nova", sem escolher uma janela existente específica.
+- Minimizar janelas inativas (exige a permissão opcional `system.display` para pouco ganho).
+- Atalho dedicado para "voltar à aba anterior" (`switch_to_previous_active_tab`).
+- Atalho padrão sugerido para abrir o popup via teclado (não declaramos um `_execute_action.suggested_key`; o usuário ainda pode atribuir um manualmente em `chrome://extensions/shortcuts`).
+- Cor por janela, suporte a Firefox — fora do escopo (Chrome/Chromium only, por decisão do projeto).
+
+## Publicação (Chrome Web Store)
+
+- **Sem coleta de dados**: tudo fica em `chrome.storage.local` no próprio navegador; não há requisições de rede nem `host_permissions`. Preencha a aba de privacidade do dashboard como "não coleta dados".
+- **Permissões declaradas**: `tabs`, `storage`, `contextMenus` — todas usadas diretamente (sem permissão órfã).
+- **Empacotamento**: ao gerar o `.zip` para upload, inclua apenas o necessário em runtime — `manifest.json`, `*.html`/`*.css`/`*.js` da raiz, `src/*.js` (exceto `*.test.js` e `src/test-helpers/`), `icons/icon16.png`/`icon32.png`/`icon48.png`/`icon128.png`. Não é necessário incluir `icons/V1/`, `icons/img/`, `docs/`, `package.json`, `LICENSE`, nem os arquivos de teste — não são referenciados pelo `manifest.json` e só aumentam o pacote.
 
 ## Instalação (modo desenvolvedor)
 
