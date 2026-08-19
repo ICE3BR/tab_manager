@@ -19,6 +19,7 @@ const el = {
   sessionsStatus: document.getElementById("sessionsStatus"),
   shortcutsBtn: document.getElementById("shortcutsBtn"),
   incognitoBtn: document.getElementById("incognitoBtn"),
+  resetPopupSizeBtn: document.getElementById("resetPopupSizeBtn"),
 };
 
 let state = createState();
@@ -44,6 +45,15 @@ el.popupHeight.addEventListener("change", async () => {
   const { height } = clampPopupSize({ width: state.popupWidth, height: el.popupHeight.value });
   state.popupHeight = height;
   el.popupHeight.value = height;
+  await save();
+});
+
+el.resetPopupSizeBtn.addEventListener("click", async () => {
+  const defaults = createState();
+  state.popupWidth = defaults.popupWidth;
+  state.popupHeight = defaults.popupHeight;
+  el.popupWidth.value = state.popupWidth;
+  el.popupHeight.value = state.popupHeight;
   await save();
 });
 

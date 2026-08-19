@@ -40,7 +40,7 @@ Acessível em `chrome://extensions` → Detalhes → "Opções da extensão", ou
 
 ### Fase 5 — Opções: paridade completa com o Tab Manager Plus
 
-- Tamanho do popup (largura/altura, até 800×600).
+- Tamanho do popup (largura/altura, até 800×600), com botão para resetar ao tamanho padrão (380×560).
 - Modo escuro, modo compacto e animações — configuráveis na própria página de Opções (o modo escuro/claro também continua disponível no painel ⚙ do popup).
 - Habilitar/desabilitar a aba "Sessões" inteira.
 - Mostrar/esconder os botões de ação (fixar, silenciar, suspender, fechar) das linhas.
