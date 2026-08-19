@@ -260,6 +260,7 @@ html, body {
   flex-shrink: 0;
   border-radius: 3px;
   background: var(--bg-elevated);
+  border: 1px solid var(--border);
 }
 
 .tab-row .info {
@@ -356,13 +357,13 @@ html, body {
 
 /* Light theme */
 html[data-theme="light"] {
-  --bg: #f5f6f8;
+  --bg: #e6e9ef;
   --bg-elevated: #ffffff;
-  --border: #d8dce3;
-  --text: #1b1f27;
-  --text-muted: #6b7383;
-  --accent: #2f6fed;
-  --accent-soft: #2f6fed22;
+  --border: #c7cdd7;
+  --text: #20242e;
+  --text-muted: #5a6270;
+  --accent: #2457d6;
+  --accent-soft: #2457d626;
   --danger: #c62828;
   --danger-soft: #c6282822;
 }
