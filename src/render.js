@@ -143,7 +143,7 @@ export function visibleTabIdsFor(tabs, state) {
 }
 
 export function renderFooter(
-  { selectAllEl, summaryEl, closeSelectedBtn, closeOthersBtn, bulkActionsBar },
+  { selectAllEl, summaryEl, closeSelectedBtn, closeOthersBtn, bulkPinBtn, bulkMuteBtn, bulkDiscardBtn },
   state,
   visibleTabIds
 ) {
@@ -151,8 +151,10 @@ export function renderFooter(
   summaryEl.textContent = `${selectedCount} selecionada${selectedCount === 1 ? "" : "s"}`;
   closeSelectedBtn.disabled = selectedCount === 0;
   closeOthersBtn.disabled = selectedCount !== 1;
+  if (bulkPinBtn) bulkPinBtn.disabled = selectedCount === 0;
+  if (bulkMuteBtn) bulkMuteBtn.disabled = selectedCount === 0;
+  if (bulkDiscardBtn) bulkDiscardBtn.disabled = selectedCount === 0;
   const allVisibleSelected =
     visibleTabIds.length > 0 && visibleTabIds.every((id) => state.selected.has(id));
   selectAllEl.checked = allVisibleSelected;
-  if (bulkActionsBar) bulkActionsBar.hidden = selectedCount === 0;
 }

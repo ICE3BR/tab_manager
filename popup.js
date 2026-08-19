@@ -41,11 +41,9 @@ const el = {
   closeOthersBtn: document.getElementById("closeOthersBtn"),
   statusMsg: document.getElementById("statusMsg"),
   sessionsTabBtn: document.querySelector('.view-tab[data-view="sessions"]'),
-  bulkActionsBar: document.getElementById("bulkActionsBar"),
   bulkPinBtn: document.getElementById("bulkPinBtn"),
   bulkMuteBtn: document.getElementById("bulkMuteBtn"),
   bulkDiscardBtn: document.getElementById("bulkDiscardBtn"),
-  bulkCloseBtn: document.getElementById("bulkCloseBtn"),
 };
 
 function applyViewMode() {
@@ -98,7 +96,9 @@ function refreshUI() {
       summaryEl: el.selectionSummary,
       closeSelectedBtn: el.closeSelectedBtn,
       closeOthersBtn: el.closeOthersBtn,
-      bulkActionsBar: el.bulkActionsBar,
+      bulkPinBtn: el.bulkPinBtn,
+      bulkMuteBtn: el.bulkMuteBtn,
+      bulkDiscardBtn: el.bulkDiscardBtn,
     },
     state,
     state.view === "sessions" ? [] : visibleTabIdsFor(allTabs, state)
@@ -359,12 +359,6 @@ el.bulkDiscardBtn.addEventListener("click", async () => {
   const succeeded = await bulkDiscard([...state.selected]);
   showStatus(`${succeeded} de ${state.selected.size} aba(s) suspensa(s).`);
   await reloadTabs();
-});
-
-el.bulkCloseBtn.addEventListener("click", async () => {
-  const ids = [...state.selected];
-  state.selected.clear();
-  await closeTabs(ids);
 });
 
 chrome.tabs.onRemoved.addListener(reloadTabs);

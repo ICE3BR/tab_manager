@@ -54,17 +54,13 @@
       <span id="selectionSummary">0 selecionadas</span>
     </label>
     <div class="action-buttons">
-      <button id="closeOthersBtn" disabled title="Fechar todas as abas exceto a selecionada">Fechar outras</button>
-      <button id="closeSelectedBtn" disabled class="danger">Fechar selecionadas</button>
+      <button id="bulkPinBtn" disabled title="Fixar/desafixar as abas selecionadas">📌</button>
+      <button id="bulkMuteBtn" disabled title="Silenciar/reativar som das abas selecionadas">🔈</button>
+      <button id="bulkDiscardBtn" disabled title="Suspender as abas selecionadas (liberar memória)">💤</button>
+      <button id="closeOthersBtn" disabled title="Fechar todas as abas exceto a selecionada">✱</button>
+      <button id="closeSelectedBtn" disabled class="danger" title="Fechar as abas selecionadas">Fechar selecionadas</button>
     </div>
   </footer>
-
-  <div id="bulkActionsBar" class="bulk-actions-bar" hidden>
-    <button id="bulkPinBtn" title="Fixar/desafixar as abas selecionadas">📌</button>
-    <button id="bulkMuteBtn" title="Silenciar/reativar som das abas selecionadas">🔈</button>
-    <button id="bulkDiscardBtn" title="Suspender as abas selecionadas (liberar memória)">💤</button>
-    <button id="bulkCloseBtn" title="Fechar as abas selecionadas" class="danger">✕</button>
-  </div>
 
   <script type="module" src="popup.js"></script>
 </body>
