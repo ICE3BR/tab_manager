@@ -66,7 +66,7 @@ Ao selecionar uma ou mais abas, uma barra aparece abaixo do resumo de seleção 
 - `background.js` — service worker: badge com total de abas e atalho de teclado.
 - `src/tabs.js` — acesso à API `chrome.tabs`.
 - `src/duplicates.js` — agrupamento de duplicatas (site / URL exata) e seleção de fechamento automático.
-- `src/actions.js` — fechar/focar/pin/mute/suspender abas.
+- `src/actions.js` — fechar/focar/pin/mute/suspender abas, e as versões em lote (`bulkPin`/`bulkMute`/`bulkDiscard`) para múltiplas abas selecionadas.
 - `src/windows.js` — mesclar janelas e mover abas entre janelas.
 - `src/sessions.js` — salvar/listar/excluir/restaurar sessões (`chrome.storage.local`).
 - `src/contextMenu.js` — lógica de "abrir em aba própria" (reaproveita `popup.html`) e "abrir popup" para o menu de contexto do ícone.
